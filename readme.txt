@@ -90,4 +90,8 @@ To further customize the stylesheet, you may modify the `textwise_post.css` file
 
 == Screenshots ==
 
-1. The TextWise plugin in Wordpress 2.7
+1. An example of the TextWise plugin publishing interface
+1. Video Suggestions
+1. Relevant Content Suggestions
+1. Product Suggestions
+1. Register for freeSemanticHacker API
