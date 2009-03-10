@@ -5,7 +5,7 @@ Copyright (c) 2008 TextWise, LLC. All Rights Reserved
 Plugin Name: TextWise
 Plugin URI: http://www.textwise.com/
 Description: SemanticHacker API integration for WordPress 2.x
-Version: 0.9.2
+Version: 0.9.3
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 */

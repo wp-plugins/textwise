@@ -705,6 +705,7 @@ function textwise_cat_toggle() {
 	var newcats = [];
 	jQuery.each(tw_catlist, function(i, cat){
 		var trimCat = jQuery.trim(cat);
+		trimCat = trimCat.toLowerCase();
 		if (trimCat != '' && trimCat != catinput && jQuery.inArray(cat, newcats) == -1) {
 			newcats.push(cat);
 		}
@@ -746,7 +747,7 @@ function textwise_wpcat_toggle() {
 	var th = jQuery(this);
 	var catname = jQuery.trim(th.parent().text());
 	tw_cats.each(function(){
-		if (jQuery(this).text() == catname) { jQuery(this).click(); }
+		if (jQuery(this).text().toLowerCase() == catname.toLowerCase()) { jQuery(this).click(); }
 	});
 }
 
@@ -756,7 +757,7 @@ function textwise_wpcat_find(catname) {
 	wpcatbox.find('label').each(function(){
 		var th = jQuery(this);
 		var name = jQuery.trim(th.text());
-		if (catname == name) {
+		if (catname.toLowerCase() == name.toLowerCase()) {
 			wpcatinput = th.find('input');
 		}
 	});

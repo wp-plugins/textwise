@@ -12,20 +12,22 @@ if ( ! current_user_can('delete_plugins') )
 //All clear:
 
 //Delete options
-delete_option('textwise_tag_enable');
-delete_option('textwise_contentlink_enable');
-delete_option('textwise_category_enable');
-delete_option('textwise_video_enable');
-delete_option('textwise_image_enable');
-delete_option('textwise_rss_enable');
-delete_option('textwise_wiki_enable');
-delete_option('textwise_product_enable');
+delete_option('textwise_amazon_ref');
+delete_option('textwise_api_token');
 delete_option('textwise_autoupdate');
-delete_option('textwise_logo_place');
-delete_option('textwise_use_logo');
-delete_option('textwise_conflict_warning');
 delete_option('textwise_box_position');
+delete_option('textwise_category_enable');
+delete_option('textwise_conflict_warning');
+delete_option('textwise_contentlink_enable');
+delete_option('textwise_image_enable');
 delete_option('textwise_list_css');
+delete_option('textwise_logo_place');
+delete_option('textwise_product_enable');
+delete_option('textwise_rss_enable');
+delete_option('textwise_tag_enable');
+delete_option('textwise_use_logo');
+delete_option('textwise_video_enable');
+delete_option('textwise_wiki_enable');
 
 //Delete post meta
 $metakeys[] = '_tw_tag_list';
