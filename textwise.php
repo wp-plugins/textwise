@@ -1,13 +1,28 @@
 <?php
 /*
-Copyright (c) 2008 TextWise, LLC. All Rights Reserved
-
-Plugin Name: TextWise
-Plugin URI: http://www.textwise.com/
+Plugin Name: TextWise Similarity Search
+Plugin URI: http://www.semantichacker.com/widget-plugin/wordpress-plugin
 Description: SemanticHacker API integration for WordPress 2.x
 Version: 0.9.3
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
+
+	Copyright 2008  TextWise, LLC.  ( email : admin@semantichacker.com )
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 define('TEXTWISE_API_URL', 'http://api.semantichacker.com/');

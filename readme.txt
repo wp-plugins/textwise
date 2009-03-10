@@ -1,4 +1,4 @@
-=== TextWise Semantic Search ===
+=== TextWise Similarity Search ===
 Contributors: textwise
 Tags: admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, widget, articles
 Requires at least: 2.6.1
