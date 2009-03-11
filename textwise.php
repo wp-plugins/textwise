@@ -46,10 +46,11 @@ add_filter('plugin_action_links_textwise/textwise.php', 'textwise_plugin_links' 
 //Load when in admin section
 add_action('admin_init', 'textwise_admin_init');
 
-//Load on editor pages only
-add_action('load-post.php', 'textwise_init_editor');
-add_action('load-post-new.php', 'textwise_init_editor');
-
+//Load on editor pages only, if token exists
+if ( get_option('textwise_api_token') ) {
+	add_action('load-post.php', 'textwise_init_editor');
+	add_action('load-post-new.php', 'textwise_init_editor');
+}
 
 //AJAX Callbacks
 add_action('wp_ajax_textwise_chk_sig', 'textwise_ajax_chk_sig');
@@ -63,6 +64,8 @@ add_action('wp_ajax_textwise_categoryinfo', 'textwise_ajax_categoryinfo');
 function textwise_admin_init() {
 	//Set defaults
 	//Won't affect existing settings
+	add_option('textwise_api_token', '');
+	add_option('textwise_amazon_ref', '');
 	add_option('textwise_tag_enable', '1');
 	add_option('textwise_contentlink_enable', '1');
 	add_option('textwise_category_enable', '1');
@@ -80,6 +83,8 @@ function textwise_admin_init() {
 
 	//For use in 2.7+
 	if (function_exists('register_setting')) {
+		register_setting('textwise', 'textwise_api_token');
+		register_setting('textwise', 'textwise_amazon_ref');
 		register_setting('textwise', 'textwise_tag_enable');
 		register_setting('textwise', 'textwise_contentlink_enable');
 		register_setting('textwise', 'textwise_category_enable');
@@ -366,6 +371,7 @@ function textwise_ajax_chk_sig() {
 
 	//Extract current content to make API call
 	$id = $_POST['post_ID'];
+	$api_req['c'] = 'wp';
 	$api_req['content'] = stripslashes($_POST['content']);
 	$api_req['showLabels'] = 'true';
 	$api_req['extractor'] = 'html';
@@ -405,6 +411,7 @@ function textwise_ajax_content_update() {
 	//$_POST has sent request info
 	//Extract current content to make API call
 	$id = $_POST['post_ID'];
+	$api_req['c'] = 'wp';
 	$api_req['content'] = stripslashes($_POST['content']);
 	$api_req['showLabels'] = 'true';
 	$api_req['filter'] = 'html';
