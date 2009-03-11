@@ -1,19 +1,19 @@
 === TextWise Similarity Search ===
 Contributors: textwise
-Tags: admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, widget, articles
+Tags: admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, articles
 Requires at least: 2.6.1
 Tested up to: 2.7.1
 Stable tag: 0.9.3
 
-Use the power of TextWise Semantic Search technology to find related images, videos, and other content to your blog post as you edit.
+Use the power of TextWise Similarity Search technology to find related images, videos, and other content to your blog post as you edit.
 
 == Description ==
 
-Create better posts with our Semantic Search plugin for Wordpress. The plugin automatically suggests related content as you write.
+Create better posts with our Similarity Search plugin for Wordpress. The plugin automatically suggests related content as you write.
 
 * Generate related category and tagging phrases
-* Enhance your post with images, links, and videos from Wikipedia, Flickr, YouTube
-* Add related links to pages on Wikipedia, Amazon, and thousands of blogs and news websites
+* Enhance your post with images, links, and videos from Wikipedia, Flickr, and YouTube
+* Add related links to pages on Wikipedia, Amazon, and thousands of news and blog websites
 
 = Features =
 
@@ -24,7 +24,7 @@ Create better posts with our Semantic Search plugin for Wordpress. The plugin au
 * **Video suggestions** bring movement and sound from YouTube
 * **Related Blogs &amp; News suggestions** offer the top articles about your topic
 * **Related Wikipedia Article suggestions** further research with content about your subject
-* **Related Amazon suggestions** show the relevant products to your readers
+* **Related Amazon suggestions** optionally show the relevant products to your readers
 
 = Configuration &amp; Customization =
 
@@ -38,31 +38,33 @@ Once the plugin is installed and activated, look for the Textwise section under 
 
 == Installation ==
 
-1. Download the plugin and extract `textwise.zip`
+1. Download the plugin and extract the archive.
 1. Upload the `textwise` folder and its contents to `/wp-content/plugins/` of your blog.
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Register for an API Token at [Semantic Hacker](http://semantichacker.com/api)
-1. Check out the `Settings` page in Wordpress for plugin options.
+1. Register for an API Token at [SemanticHacker.com](http://semantichacker.com/api)
+1. Check out the `Settings` page in WordPress for plugin options.
 
 == Frequently Asked Questions ==
 
-= What is Semantic Search? =
+= What is Similarity Search? =
 
-Semantic Search analyzes a body of text in order to find the concepts within it. The responses we provide from our database are the results that closely match those same concepts.
+Similarity Search analyzes a body of text in order to find the concepts within it. The responses we provide from our database are the results that closely match those same concepts.
 
 At the core of this process are Semantic Signatures&reg;, a new way of representing and analyzing semantic information in text. Semantic Signatures provide a representation of the multiple concepts and topics contained in a body of text, whether a few words or an entire document.
 
-Learn more about our Semantic Search technologies at [TextWise.com](http://www.textwise.com/)
+Learn more about our Similarity Search technologies at [TextWise.com](http://www.textwise.com/)
 
 = How does the plugin work? =
 
 By using the freely available SemanticHacker API to access our Semantic Search technology, the content of a blog post is analyzed and matched with related content. Those suggestions are displayed as you edit your post.
 
+Learn more about our SemanticHacker API at [SemanticHacker.com](http://www.semantichacker.com/)
+
 = How can I use images and video into my post? =
 
-Click or drag-and-drop the image thumbnail to add it to your post. Click a video suggestion to insert it. Remove the image or video from the post by clicking the selection again.
+Click-on or drag-and-drop the image thumbnail to add it to your post. Click a video suggestion to insert it. Remove the image or video from the post by clicking the selection again.
 
-Image settings and formatting can be changed by using the image controls built in to Wordpress. Select the image and then click the ***Edit Image*** icon.
+Image settings and formatting can be changed by using the image controls built in to WordPress. Select the image and then click the ***Edit Image*** icon.
 
 Video settings can be changed through the Wordpress embedded media settings. Select the placeholder for the video and then click the ***Insert / edit embedded media*** button on the second row of buttons in the editor. *If the second row is not visible, show the "Kitchen Sink" by clicking the last button on the first row of the editor.*
 
