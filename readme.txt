@@ -3,7 +3,7 @@ Contributors: textwise
 Tags: admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, articles
 Requires at least: 2.6.1
 Tested up to: 2.7.1
-Stable tag: 0.9.3
+Stable tag: 0.9.4
 
 Use the power of TextWise Similarity Search technology to find related images, videos, and other content to your blog post as you edit.
 
