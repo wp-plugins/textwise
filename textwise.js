@@ -504,12 +504,11 @@ function textwise_sync_contentlink_list() {
 	ulLinks.empty();
 	jQuery.each(tw_links, function(i, link) {
 		var tag = jQuery(link).text();
-		ulLinks.append('<li><a class="textwise_tag_link selected">'+textwise_html_esc(tag)+'</a></li>');
+		if (tag != '') {
+			ulLinks.append('<li><a class="textwise_tag_link selected">'+textwise_html_esc(tag)+'</a></li>');
+		}
 	});
 
-//	if ( rich ){
-//		tinyMCE.activeEditor.getDoc().ignoreDOM = false;
-//	}
 
 }
 
@@ -542,8 +541,8 @@ function textwise_link_toggle() {
 				var end = bound[i+1];
 				//var len = end - start;
 				newcontent = oldcontent.substring(0, start)
-					+ oldcontent.substring(start, end).replace(re_term, newTag)
-					+ oldcontent.substring(end, oldcontent.length);
+					+ oldcontent.substring(start, end+1).replace(re_term, newTag)
+					+ oldcontent.substring(end+1, oldcontent.length);
 				if (newcontent != oldcontent) { break; }
 			}
 //			var newcontent = items.html().replace(re_term, newTag);
