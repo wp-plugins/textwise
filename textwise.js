@@ -1223,6 +1223,7 @@ function textwise_tinymce_special_node(node) {
 
 	if (p = getClosest('div.mceTemp', node)) { return p; }
 	if (p = getClosest('span.tw_selvid', node)) { return p; }
+	if (p = getClosest('a', node)) { return jQuery(p).parent(); }
 	return node;
 }
 
