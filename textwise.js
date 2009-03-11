@@ -517,29 +517,37 @@ function textwise_link_toggle() {
 	var term = jQuery(this).text();
 	var re_term_esc = new RegExp('([\\\\\\|\\(\\)\\[\\{\\^\\$\\*\\+\\?\\.])', 'g');
 	var esc_term = term.replace(re_term_esc, '\\$1');
-	var tw_links = [];
-	var re_term = new RegExp('([^<>]*?(<.*?>)?[^<>]*?)(\\b|[^\\w])('+esc_term+')(\\b|[^\\w])', 'i');
-	var newTag = '$1$3<a class="tw_contentlink" href="http://en.wikipedia.org/wiki/$4">$4</a>$5';
+//	var re_term = new RegExp('([^<>]*?(<.*?>)?[^<>]*?)(\\b|[^\\w])('+esc_term+')(\\b|[^\\w])', 'i');
+//	var newTag = '$1$3<a class="tw_contentlink" href="http://en.wikipedia.org/wiki/$4">$4</a>$5';
+	var re_term = new RegExp('(\\b|[^\\w])('+esc_term+')(\\b|[^\\w])', 'i');
+	var newTag = '$1<a class="tw_contentlink" href="http://en.wikipedia.org/wiki/$2">$2</a>$3';
+
 	var rich = (textwise_getEditor() == 'tinymce');
-	var i_dom;
-	if ( rich ) {
-		tinyMCE.activeEditor.getDoc().ignoreDOM = true;
-		var ed = tinyMCE.activeEditor;
-		textwise_getContent();
-		i_dom = jQuery(ed.getBody());
-	} else {
-		i_dom = jQuery('<div>'+jQuery('#content').val()+'</div>');
-	}
+	var i_dom = textwise_getIDom();
+	var tw_links = [];
 
 	var tw_links = i_dom.find('a.tw_contentlink:contains('+term+')');
-        if (tw_links.length) {
+	if (tw_links.length) {
 		tw_links.replaceWith(tw_links.text());
 		jQuery(this).removeClass('selected');
 		if( ! rich ) { jQuery('#content').val(jQuery(i_dom).html()); }
 	} else {
-		var items =  jQuery(':contains('+term+'):first', i_dom);
+		var items = jQuery(':contains('+term+'):first', i_dom);
 		if(items.length) {
-			var newcontent = items.html().replace(re_term, newTag);
+			var oldcontent = items.html();
+			var newcontent;
+			var bound = textwise_locate_boundaries(oldcontent);
+			for (i=0; i<bound.length; i += 2) {
+				var start = bound[i];
+				var end = bound[i+1];
+				//var len = end - start;
+				newcontent = oldcontent.substring(0, start)
+					+ oldcontent.substring(start, end).replace(re_term, newTag)
+					+ oldcontent.substring(end, oldcontent.length);
+				if (newcontent != oldcontent) { break; }
+			}
+//			var newcontent = items.html().replace(re_term, newTag);
+
 			items.html(newcontent);
 			jQuery(this).addClass('selected');
 			if( ! rich ) { jQuery('#content').val(jQuery(i_dom).html()); }
@@ -550,7 +558,7 @@ function textwise_link_toggle() {
 				jQuery(this).addClass('selected');
 				jQuery('#content').val(newcontent);
 			}
-                }
+		}
 	}
 
 	if ( rich ) { tinyMCE.activeEditor.getDoc().ignoreDOM = false; }
@@ -770,7 +778,6 @@ function textwise_sync_image_list() {
 	var tableImg = jQuery('#textwise_image_table tr');
 	tableImg.empty();
 	var editor_images;
-//	var rich = (typeof tinyMCE != "undefined") && tinyMCE.activeEditor && !tinyMCE.activeEditor.isHidden();
 	var rich = (textwise_getEditor() == 'tinymce');
 	if ( rich ) {
 		var ed = tinyMCE.activeEditor;
@@ -850,6 +857,7 @@ function textwise_image_toggle(e) {
 			var el = tinyMCE.activeEditor.selection.getNode();
 			var el2 = textwise_tinymce_special_node(el);
 			el = (el == el2) ? el : jQuery(el2).parent();
+			if (jQuery(el).is('a')) { el = jQuery(el).parent(); }
 			jQuery(el).prepend(htmlTag);
 
 			textwise_getContent();
@@ -1036,6 +1044,7 @@ function textwise_video_toggle(e) {
 			var el = tinyMCE.activeEditor.selection.getNode();
 			var el2 = textwise_tinymce_special_node(el);
 			el = (el == el2) ? el : jQuery(el2).parent();
+			if (jQuery(el).is('a')) { el = jQuery(el).parent(); }
 			jQuery(el).prepend(htmlTag);
 
 //			if (el != el2) {
@@ -1223,7 +1232,6 @@ function textwise_tinymce_special_node(node) {
 
 	if (p = getClosest('div.mceTemp', node)) { return p; }
 	if (p = getClosest('span.tw_selvid', node)) { return p; }
-	if (p = getClosest('a', node)) { return jQuery(p).parent(); }
 	return node;
 }
 
@@ -1298,6 +1306,39 @@ function textwise_get_links(objs) {
 	});
 	return cur_links;
 }
+
+function textwise_locate_boundaries(html) {
+	var bounds = new Array();
+	var ci = 0;
+	var si = 0;
+	var ei = 0;
+	do {
+		si = html.indexOf('<', ei);
+		if(si == -1) {
+			bounds.push(ci);
+			bounds.push(html.length - 1);
+			break;
+		}
+		bounds.push(ci);
+		if(si > ci) {
+			bounds.push(si - 1);
+		} else {
+			bounds.pop();
+		}
+		ei = html.indexOf('>', si);
+		if(ei == -1) {
+			bounds.push(html.length - 1);
+			break;
+		} else if(ei == html.length -1) {
+			break;
+		} else {
+			ci = ei + 1;
+		}
+	} while(true);
+
+	return bounds;
+}
+
 
 /* HTML fragments */
 function textwise_html_video(objVid, selected) {
