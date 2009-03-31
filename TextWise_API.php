@@ -437,10 +437,6 @@ class TextWise_API
                                                 $attributeName = $e4['attributes']['name'];
                                                 $matchArray[$attributeName] = $e4['value'];
                                             }
-                                            else
-                                            {
-                                                $this->xml_parse_error($parsed[$i]);
-                                            }
 
                                             ++$i;
                                         }
