@@ -3,7 +3,7 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://www.semantichacker.com/widget-plugin/wordpress-plugin
 Description: SemanticHacker API integration for WordPress 2.x
-Version: 0.9.5
+Version: 0.9.6
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
@@ -471,8 +471,13 @@ function textwise_ajax_content_update() {
 	//Categories
 	if (get_option('textwise_category_enable') == '1') {
 		$result = $api->category($api_req);
+		$cat_results = null;
+		if(isset($result['categories'])) 
+			$cat_results = $result['categories'];
+		else 
+			$cat_results = array();
 		$arrCategories = array();
-		foreach ($result['categories'] as $c) {
+		foreach ($cat_results as $c) {
 			$arrCategories[] = textwise_esc_json($c['label']);
 		}
 		$data = "'".implode($arrCategories, "','")."'";
@@ -491,8 +496,13 @@ function textwise_ajax_content_update() {
 		$api_req['fields'] = 'title,landingPageUrl,enclosureUrl,thumbnailUrl';
 		$result = $api->match($api_req);
 		$vidString = "{title: '%s', thumbnailUrl: '%s', enclosureUrl: '%s', landingPageUrl: '%s', videoId: '%s'}";
+		$vid_results = null;
+                if(isset($result['matches'])) 
+                        $vid_results = $result['matches'];
+                else 
+                        $vid_results = array();
 		$arrVideos = array();
-		foreach ($result['matches'] as $m) {
+		foreach ($vid_results as $m) {
 			if ($m['thumnailUrl'] != '') {
 				$vidThumb = $m['thumbnailUrl'];
 			} else {
@@ -524,8 +534,13 @@ function textwise_ajax_content_update() {
 		$api_req['fields'] = 'title,thumbnailUrl,imageUrl,source,landingPageUrl';
 		$result = $api->match($api_req);
 		$imgString = "{title:'%s', thumbnailUrl:'%s', landingPageUrl:'%s', imageUrl:'%s', source:'%s'}";
+		$img_results = null;
+		if(isset($result['matches'])) 
+			$img_results = $result['matches'];
+		else
+			$img_results = array();
 		$arrImages = array();
-		foreach ($result['matches'] as $m) {
+		foreach ($img_results as $m) {
 			$arrImages[] = sprintf($imgString,
 				textwise_esc_json($m['title']),
 				textwise_esc_json($m['thumbnailUrl']),
@@ -551,8 +566,13 @@ function textwise_ajax_content_update() {
 		$api_req['fields'] = 'title,description,landingPageUrl,channelTitle,channelLink';
 		$result = $api->match($api_req);
 		$rssString = "{title:'%s', description:'%s', landingPageUrl:'%s', channelTitle: '%s', channelLink: '%s'}";
+		$bnews_results = null;
+		if(isset($result['matches'])) 
+			$bnews_results = $result['matches'];
+		else 
+			$bnews_results = array();
 		$arrRss = array();
-		foreach ($result['matches'] as $m) {
+		foreach ($bnews_results as $m) {
 			$arrRss[] = sprintf($rssString,
 				textwise_esc_json($m['title']),
 				textwise_esc_json(substr($m['description'],0,200)),
@@ -577,8 +597,13 @@ function textwise_ajax_content_update() {
 		$api_req['fields'] = 'title,description,landingPageUrl,channelTitle,channelLink';
 		$result = $api->match($api_req);
 		$wikiString = "{title:'%s', description:'%s', landingPageUrl:'%s', channelTitle: '%s', channelLink: '%s'}";
+		$wiki_results = null;
+		if(isset($result['matches'])) 
+			$wiki_results = $result['matches'];
+		else
+			$wiki_results = array();
 		$arrWiki = array();
-		foreach ($result['matches'] as $m) {
+		foreach ($wiki_results as $m) {
 			$arrWiki[] = sprintf($wikiString,
 				textwise_esc_json($m['title']),
 				textwise_esc_json(substr($m['description'],0,200)),
@@ -603,12 +628,17 @@ function textwise_ajax_content_update() {
 		$api_req['indexId'] = 'amazon';
 		$api_req['fields'] = 'title,description,landingPageUrl,imageUrl';
 		$result = $api->match($api_req);
-		$matches = $result['matches'];
+		$prod_results = null;
+		if(isset($result['matches'])) 
+			$prod_results = $result['matches'];
+		else 
+			$prod_results = array();
+
 		$prodString = "{title:'%s', description:'%s', landingPageUrl:'%s', imageUrl:'%s'}";
 		$uniqueMatches = array();
 		$arrProducts = array();
 		$dupFields = array('title' => 40, 'description' => 140);
-		foreach ($matches as $m) {
+		foreach ($prod_results as $m) {
 			$m['description'] = substr($m['description'],0,140);
 			if (!textwise_objDup($uniqueMatches, $m, $dupFields)) {
 				$uniqueMatches[] = $m;
