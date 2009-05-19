@@ -92,6 +92,15 @@ function textwise_opt_logo() {
 					<label for="textwise_list_css_force"><input type="radio" id="textwise_list_css_force" name="textwise_list_css" value="1" <?php echo ( get_option('textwise_list_css') == '1') ? 'checked' : ''; ?> /> Force list items to be left justified</label>
 				</td>
 			</tr>
+			<tr valign="top">
+				<th scope="row">Related Link targets</th>
+				<td>
+					<label for="textwise_related_link_target_none"><input type="radio" id="textwise_related_link_target_none" name="textwise_related_link_target" value="" <?php echo ( get_option('textwise_related_link_target') == '' ) ? 'checked' : ''; ?> /> Use the current window</label><br />
+					<label for="textwise_related_link_target_new"><input type="radio" id="textwise_related_link_target_new" name="textwise_related_link_target" value="new" <?php echo ( get_option('textwise_related_link_target') == 'new' ) ? 'checked' : ''; ?> /> Open a new window</label><br />
+					<label for="textwise_related_link_target_custom"><input type="radio" id="textwise_related_link_target_custom" name="textwise_related_link_target" value="custom" <?php echo ( get_option('textwise_related_link_target') == 'custom' ) ? 'checked' : ''; ?> /> Custom <code>target</code></label>
+						<input type="text" name="textwise_related_link_target_custom" value="<?php echo get_option('textwise_related_link_target_custom')?>" /><br />
+
+
 			<tr valign="top" id="conflicts">
 				<th scope="row">Plugin Conflict Warning</th>
 				<td><label for="textwise_conflict_warning"><input type="checkbox" id="textwise_conflict_warning" name="textwise_conflict_warning" value="1" <?php echo ( get_option('textwise_conflict_warning') == '1') ? 'checked' : ''; ?>> Disable warning</label><br />
@@ -110,7 +119,7 @@ function textwise_opt_logo() {
 <? } ?>
 		</table>
 		<input type="hidden" name="action" value="update" />
-		<input type="hidden" name="page_options" value="textwise_api_token,textwise_category_enable,textwise_tag_enable,textwise_contentlink_enable,textwise_video_enable,textwise_image_enable,textwise_rss_enable,textwise_wiki_enable,textwise_product_enable,textwise_logo_place,textwise_use_logo,textwise_autoupdate,textwise_conflict_warning,textwise_amazon_ref,textwise_box_position,textwise_list_css" />
+		<input type="hidden" name="page_options" value="textwise_api_token,textwise_category_enable,textwise_tag_enable,textwise_contentlink_enable,textwise_video_enable,textwise_image_enable,textwise_rss_enable,textwise_wiki_enable,textwise_product_enable,textwise_logo_place,textwise_use_logo,textwise_autoupdate,textwise_conflict_warning,textwise_amazon_ref,textwise_box_position,textwise_list_css,textwise_related_link_target,textwise_related_link_target_custom" />
 		<p class="submit">
 			<input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" />
 		</p>
