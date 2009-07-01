@@ -36,6 +36,9 @@ The plugin provides a number of customization options to work within your needs.
 
 Once the plugin is installed and activated, look for the Textwise section under Settings in the Wordpress administrative section.
 
+= Contributors =
+* Jeff Brand, Delta Factory
+
 == Installation ==
 
 1. Download the plugin and extract the archive.
@@ -89,6 +92,11 @@ You may change these options in the Settings section. Please note that videos, i
 Elements added to the blog by the TextWise plugin have been designed to conform to your selected theme as seamlessly as possible. To select the logo that best fits with your theme, please see the Settings screen for variations. Your mileage may vary.
 
 To further customize the stylesheet, you may modify the `textwise_post.css` file in the plugin directory.
+
+== Changelog ==
+
+= July 2009 =
+* Added custom target specification for links
 
 == Screenshots ==
 

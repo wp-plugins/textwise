@@ -519,7 +519,8 @@ function textwise_link_toggle() {
 //	var re_term = new RegExp('([^<>]*?(<.*?>)?[^<>]*?)(\\b|[^\\w])('+esc_term+')(\\b|[^\\w])', 'i');
 //	var newTag = '$1$3<a class="tw_contentlink" href="http://en.wikipedia.org/wiki/$4">$4</a>$5';
 	var re_term = new RegExp('(\\b|[^\\w])('+esc_term+')(\\b|[^\\w])', 'i');
-	var newTag = '$1<a class="tw_contentlink" href="http://en.wikipedia.org/wiki/$2">$2</a>$3';
+	var optTarget = (textwise_dataobject.opt_target != '') ? 'target="'+textwise_dataobject.opt_target+'"' : '';
+	var newTag = '$1<a class="tw_contentlink" '+optTarget+' href="http://en.wikipedia.org/wiki/$2">$2</a>$3';
 
 	var rich = (textwise_getEditor() == 'tinymce');
 	var i_dom = textwise_getIDom();

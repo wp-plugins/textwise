@@ -890,6 +890,18 @@ function textwise_dataobject() {
 //	$rss_list = isset($post_meta['_tw_rss_list']) ? implode(explode($post_meta['_tw_rss_list'], "\n"), ',') : '';
 //	$wiki_list = isset($post_meta['_tw_wiki_list']) ? implode(explode($post_meta['_tw_wiki_list'], "\n"), ',') : '';
 //	$product_list = isset($post_meta['_tw_product_list']) ? implode(explode($post_meta['_tw_product_list'], "\n"), ',') : '';
+
+	switch (get_option('textwise_related_link_target')) {
+		case 'new':
+			$strTarget = '_blank';
+			break;
+		case 'custom':
+			$strTarget = get_option('textwise_related_link_target_custom');
+			break;
+		default:
+			$strTarget = '';
+	}
+
 	$output = <<<_EOF_
 <script>
 var textwise_dataobject = {
@@ -905,6 +917,7 @@ var textwise_dataobject = {
 	"product_enable" : $product_enable,
 	"tag_list" : '$tag_list',
 	"cat_list" : '$cat_list',
+	"opt_target" : '$strTarget',
 	"lastUpdateSuccess" : false
 };
 </script>
