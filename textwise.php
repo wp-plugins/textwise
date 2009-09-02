@@ -3,7 +3,7 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://www.semantichacker.com/widget-plugin/wordpress-plugin
 Description: SemanticHacker API integration for WordPress 2.x
-Version: 0.9.7
+Version: 0.9.6
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
@@ -80,8 +80,6 @@ function textwise_admin_init() {
 	add_option('textwise_conflict_warning', '0');
 	add_option('textwise_box_position', '0');
 	add_option('textwise_list_css', '0');
-	add_option('textwise_related_link_target', '');
-	add_option('textwise_related_link_target_custom', '');
 
 	//For use in 2.7+
 	if (function_exists('register_setting')) {
@@ -101,8 +99,6 @@ function textwise_admin_init() {
 		register_setting('textwise', 'textwise_conflict_warning');
 		register_setting('textwise', 'textwise_box_position');
 		register_setting('textwise', 'textwise_list_css');
-		register_setting('textwise', 'textwise_related_link_target');
-		register_setting('textwise', 'textwise_related_link_target_custom');
 	}
 	if ( function_exists('add_meta_box') ) {
 		$force = (get_option('textwise_box_position') == '1') ? true : false;
@@ -476,9 +472,9 @@ function textwise_ajax_content_update() {
 	if (get_option('textwise_category_enable') == '1') {
 		$result = $api->category($api_req);
 		$cat_results = null;
-		if(isset($result['categories']))
+		if(isset($result['categories'])) 
 			$cat_results = $result['categories'];
-		else
+		else 
 			$cat_results = array();
 		$arrCategories = array();
 		foreach ($cat_results as $c) {
@@ -501,9 +497,9 @@ function textwise_ajax_content_update() {
 		$result = $api->match($api_req);
 		$vidString = "{title: '%s', thumbnailUrl: '%s', enclosureUrl: '%s', landingPageUrl: '%s', videoId: '%s'}";
 		$vid_results = null;
-                if(isset($result['matches']))
+                if(isset($result['matches'])) 
                         $vid_results = $result['matches'];
-                else
+                else 
                         $vid_results = array();
 		$arrVideos = array();
 		foreach ($vid_results as $m) {
@@ -539,7 +535,7 @@ function textwise_ajax_content_update() {
 		$result = $api->match($api_req);
 		$imgString = "{title:'%s', thumbnailUrl:'%s', landingPageUrl:'%s', imageUrl:'%s', source:'%s'}";
 		$img_results = null;
-		if(isset($result['matches']))
+		if(isset($result['matches'])) 
 			$img_results = $result['matches'];
 		else
 			$img_results = array();
@@ -571,9 +567,9 @@ function textwise_ajax_content_update() {
 		$result = $api->match($api_req);
 		$rssString = "{title:'%s', description:'%s', landingPageUrl:'%s', channelTitle: '%s', channelLink: '%s'}";
 		$bnews_results = null;
-		if(isset($result['matches']))
+		if(isset($result['matches'])) 
 			$bnews_results = $result['matches'];
-		else
+		else 
 			$bnews_results = array();
 		$arrRss = array();
 		foreach ($bnews_results as $m) {
@@ -602,7 +598,7 @@ function textwise_ajax_content_update() {
 		$result = $api->match($api_req);
 		$wikiString = "{title:'%s', description:'%s', landingPageUrl:'%s', channelTitle: '%s', channelLink: '%s'}";
 		$wiki_results = null;
-		if(isset($result['matches']))
+		if(isset($result['matches'])) 
 			$wiki_results = $result['matches'];
 		else
 			$wiki_results = array();
@@ -633,9 +629,9 @@ function textwise_ajax_content_update() {
 		$api_req['fields'] = 'title,description,landingPageUrl,imageUrl';
 		$result = $api->match($api_req);
 		$prod_results = null;
-		if(isset($result['matches']))
+		if(isset($result['matches'])) 
 			$prod_results = $result['matches'];
-		else
+		else 
 			$prod_results = array();
 
 		$prodString = "{title:'%s', description:'%s', landingPageUrl:'%s', imageUrl:'%s'}";
@@ -787,14 +783,14 @@ function textwise_content_filter($content = '') {
 		$product_enable = false;
 	}
 
-	$strRss = '<li><a %s href="%s">%s</a> :: <em><a %s href="%s">%s</a></em></li>';
-	$strWiki = '<li><a %s href="%s">%s</a></li>';
-	//$strProduct = '<li><a %s href="%s">%s</a></li>';
+	$strRss = '<li><a href="%s">%s</a> :: <em><a href="%s">%s</a></em></li>';
+	$strWiki = '<li><a href="%s">%s</a></li>';
+	$strProduct = '<li><a href="%s">%s</a></li>';
 	$strProduct = <<<_EOF_
 	<tr class="tw_itemrow">
 		<td class="tw_imagecell"><img src="%s" width="120" alt="%s" /></td>
 		<td>
-			<span class="title%s"><a %s href="%s">%s</a></span>
+			<span class="title%s"><a href="%s">%s</a></span>
 			<span class="source">:: Amazon</span>
 			<span class="description small"><small>%s</small></span>
 		</td>
@@ -808,20 +804,6 @@ _EOF_;
 		$ulTag = '<ul>';
 		$forceLeft = '';
 	}
-
-	switch (get_option('textwise_related_link_target')) {
-		case 'new':
-			$strTarget = '_blank';
-			break;
-		case 'custom':
-			$strTarget = get_option('textwise_related_link_target_custom');
-			break;
-		default:
-			$strTarget = '';
-	}
-
-	$strTarget = ($strTarget != '') ? "target=\"$strTarget\"" : '';
-
 	//If any  info is turned on and selected, build the snippet
 	$links = '';
 	if ($rss_enable || $wiki_enable || $product_enable) {
@@ -830,7 +812,7 @@ _EOF_;
 			$links .= "<h4 id='twBlogs'>Similar Blog & News Articles$logoSubHead</h4>";
 			$links .= $ulTag;
 			foreach ($objRss as $obj) {
-				$links .= sprintf($strRss, $strTarget, $obj['landingPageUrl'], $obj['title'], $strTarget, $obj['channelLink'], $obj['channelTitle']);
+				$links .= sprintf($strRss, $obj['landingPageUrl'], $obj['title'], $obj['channelLink'], $obj['channelTitle']);
 			}
 			$links .= '</ul>';
 		}
@@ -839,7 +821,7 @@ _EOF_;
 			$links .= "<h4 id='twWiki'>Similar Wikipedia Articles$logoSubHead</h4>";
 			$links .= $ulTag;
 			foreach ($objWiki as $obj) {
-				$links .= sprintf($strWiki, $strTarget, $obj['landingPageUrl'], $obj['title']);
+				$links .= sprintf($strWiki, $obj['landingPageUrl'], $obj['title']);
 			}
 			$links .= '</ul>';
 		}
@@ -847,7 +829,7 @@ _EOF_;
 		if ($product_enable) {
 			$links .= "<h4 id='twProducts'>Similar Products$logoSubHead</h4><table class=\"tw_products\" border=\"0\">";
 			foreach ($objProduct as $obj) {
-				$links .= sprintf($strProduct, $obj['imageUrl'], $obj['title'], $forceLeft, $strTarget, textwise_amazon_ref($obj['landingPageUrl']), $obj['title'], $obj['description']);
+				$links .= sprintf($strProduct, $obj['imageUrl'], $obj['title'], $forceLeft, textwise_amazon_ref($obj['landingPageUrl']), $obj['title'], $obj['description']);
 			}
 			$links .= '</table>';
 		}
@@ -890,18 +872,6 @@ function textwise_dataobject() {
 //	$rss_list = isset($post_meta['_tw_rss_list']) ? implode(explode($post_meta['_tw_rss_list'], "\n"), ',') : '';
 //	$wiki_list = isset($post_meta['_tw_wiki_list']) ? implode(explode($post_meta['_tw_wiki_list'], "\n"), ',') : '';
 //	$product_list = isset($post_meta['_tw_product_list']) ? implode(explode($post_meta['_tw_product_list'], "\n"), ',') : '';
-
-	switch (get_option('textwise_related_link_target')) {
-		case 'new':
-			$strTarget = '_blank';
-			break;
-		case 'custom':
-			$strTarget = get_option('textwise_related_link_target_custom');
-			break;
-		default:
-			$strTarget = '';
-	}
-
 	$output = <<<_EOF_
 <script>
 var textwise_dataobject = {
@@ -917,7 +887,6 @@ var textwise_dataobject = {
 	"product_enable" : $product_enable,
 	"tag_list" : '$tag_list',
 	"cat_list" : '$cat_list',
-	"opt_target" : '$strTarget',
 	"lastUpdateSuccess" : false
 };
 </script>
