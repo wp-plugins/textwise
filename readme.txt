@@ -36,6 +36,9 @@ The plugin provides a number of customization options to work within your needs.
 
 Once the plugin is installed and activated, look for the Textwise section under Settings in the Wordpress administrative section.
 
+= Contributors =
+* Jeff Brand, Delta Factory
+
 == Installation ==
 
 1. Download the plugin and extract the archive.

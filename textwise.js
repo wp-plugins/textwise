@@ -3,9 +3,12 @@
 *************************/
 
 //Case insensitive 'contains' matches
-jQuery.extend(
-  jQuery.expr[':'], {
-    contains : "jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0"
+
+jQuery.extend(jQuery.expr[':'], {
+	//contains : "jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0"	//Worked in WP2.7
+	contains : function(a, i, m) {
+		return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0;
+	}
 });
 
 var textwise_settings = {
@@ -15,7 +18,9 @@ var textwise_settings = {
 	ajaxComplete: true,
 	offTop: 100,
 	offLeft: 30,
-	lastHover: false
+	lastHover: false,
+	tagchecklist: '#tagchecklist',
+	taginput: '#tags-input',
 }
 
 jQuery(document).ready(textwise_init);
@@ -23,7 +28,13 @@ jQuery(document).ready(textwise_init);
 //Initialization
 function textwise_init() {
 	//Only enable feature if the HTML element is available and able to be used.
-	textwise_dataobject.tag_enable = (textwise_dataobject.tag_enable == 1) && jQuery('#tagchecklist').length ? 1 : 0;
+
+	//Handle WP core r10222 of /wp-admin/edit-form-advanced.php changing tagchecklist from id to class
+	if (!jQuery(textwise_settings.tagchecklist).length) {
+		textwise_settings.tagchecklist = '.tagchecklist';
+		textwise_settings.taginput = '#tax-input\\[post_tag\\]';
+	}
+	textwise_dataobject.tag_enable = (textwise_dataobject.tag_enable == 1) && jQuery(textwise_settings.tagchecklist).length ? 1 : 0;
 	textwise_dataobject.cat_enable = (textwise_dataobject.cat_enable == 1) && jQuery('#categories-all').length ? 1 : 0;
 	textwise_dataobject.contentlink_enable = (textwise_dataobject.contentlink_enable == 1) && jQuery('#postdivrich').length ? 1 : 0;
 
@@ -31,7 +42,7 @@ function textwise_init() {
 	var helpImage = function(id){ return '<img id="'+id+'" class="textwise_help" src="'+textwise_settings.pluginDir+'/img/help.gif" alt="(?)" />';};
 	//Tags
 	if (textwise_dataobject.tag_enable == 1) {
-		jQuery('#tagchecklist').after('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_concept.gif" alt="Concept Tag Suggestions" />'
+		jQuery(textwise_settings.tagchecklist).after('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_concept.gif" alt="Concept Tag Suggestions" />'
 			+'<img src="'+textwise_settings.pluginDir+'/img/head_powered_by_textwise.gif" alt="powered by TextWise" /></em> '
 			+helpImage('textwise_tag_help')+'</p>'
 			+'<ul id="textwise_tags"><li><em>Start entering content and click Update Textwise Suggestions to begin</em></li></ul></div>'
@@ -50,7 +61,7 @@ function textwise_init() {
 
 	//Content links
 	if (textwise_dataobject.contentlink_enable == 1) {
-		jQuery('#postdivrich').append('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_link.gif" alt="TextWise Content Link Suggestions" /></em></p><ul id="textwise_contentlinks"></li></ul></div><br class="clearleft"/>');
+		jQuery('#postdivrich').append('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_link.gif" alt="TextWise Content Link Suggestions" /></em>'+helpImage('textwise_contentlink_help')+'</p><ul id="textwise_contentlinks"></li></ul></div><br class="clearleft"/>');
 	}
 
 	//Image and video tag enhancement
@@ -142,7 +153,9 @@ function textwise_getEditor() {
 	if (textwise_dataobject.wpVersion < '2.7') {
 		return wpTinyMCEConfig.defaultEditor;
 	} else {
-		return getUserSetting('editor');
+		var editor = getUserSetting('editor');
+		editor = (editor == '') ? 'tinymce' : editor;
+		return editor;
 	}
 }
 
@@ -568,7 +581,7 @@ function textwise_link_toggle() {
 
 function textwise_tag_toggle() {
 	var taginput = jQuery(this).text();
-	var wp_taglist = jQuery('#tags-input').val();
+	var wp_taglist = jQuery(textwise_settings.taginput).val();
 	var tw_taglist = jQuery('#textwise_tag_input').val();
 
 	if (jQuery(this).hasClass('selected')) {
@@ -591,7 +604,7 @@ function textwise_tag_toggle() {
 			}
 		});
 
-		jQuery('#tags-input').val(new_tags.join(','));	//Wordpress' tag list
+		jQuery(textwise_settings.taginput).val(new_tags.join(','));	//Wordpress' tag list
 		jQuery('#textwise_tag_input').val(tw_new_tags.join(','));	//Textwise tag list
 		tag_update_quickclicks();	//From WP codebase
 		jQuery('#newtag').focus();
@@ -601,7 +614,7 @@ function textwise_tag_toggle() {
 		wp_taglist = wp_taglist + ',' + taginput;
 		//Tag string cleanup from WP code, post.js: tag_flush_to_text()
 		wp_taglist = wp_taglist.replace( /\s+,+\s*/g, ',' ).replace( /,+/g, ',' ).replace( /,+\s+,+/g, ',' ).replace( /,+\s*$/g, '' ).replace( /^\s*,+/g, '' );
-		jQuery('#tags-input').val( wp_taglist );
+		jQuery(textwise_settings.taginput).val( wp_taglist );
 
 		tw_taglist = tw_taglist + ',' + taginput;
 		tw_taglist = tw_taglist.replace( /\s+,+\s*/g, ',' ).replace( /,+/g, ',' ).replace( /,+\s+,+/g, ',' ).replace( /,+\s*$/g, '' ).replace( /^\s*,+/g, '' );
@@ -640,7 +653,7 @@ function textwise_tag_hover(e) {
 //Sync meta value with current tag selections
 //Rebuild tag list and input
 function textwise_sync_tag_list() {
-	var wp_tags = jQuery('#tags-input').val().split(',');
+	var wp_tags = jQuery(textwise_settings.taginput).val().split(',');
 	var tw_tags = jQuery('#textwise_tag_input').val().split(',');
 	var common_tags = [];
 	jQuery.each( tw_tags, function( key, val ) {
@@ -664,7 +677,7 @@ function textwise_sync_tag_list() {
 function textwise_wptag_remove() {
 	var id = jQuery( this ).attr( 'id' );
 	var num = id.substr( 10 );
-	var current_tags = jQuery( '#tags-input' ).val().split(',');
+	var current_tags = jQuery( textwise_settings.taginput ).val().split(',');
 	var tw_taglist = jQuery('#textwise_tag_input').val();
 	var tw_tags = tw_taglist.split(',');
 	var newtags = [];
@@ -681,7 +694,7 @@ function textwise_wptag_remove() {
 }
 
 function textwise_wptag_rebind() {
-	jQuery('#tagchecklist a.ntdelbutton').unbind().click(textwise_wptag_remove).click(new_tag_remove_tag);
+	jQuery(textwise_settings.tagchecklist+' a.ntdelbutton').unbind().click(textwise_wptag_remove).click(new_tag_remove_tag);
 }
 /** Categories **/
 
@@ -1406,7 +1419,7 @@ function textwise_help_bubble() {
 	helpStrings['textwise_video_help'] = 'The text of your post is used as input to the <em>match</em> API call where a Semantic Signature is generated for the post and matched with Signatures of videos found in our content indexes. Only the best matches are then shown for you to include in your post.';
 	helpStrings['textwise_image_help'] = 'The text of your post is used as input to the <em>match</em> API call where a Semantic Signature is generated for the post and matched with Signatures of images in our content indexes. Only the best matches are then shown for you to include in your post.';
 	helpStrings['textwise_link_help'] = 'The text of your post is used as input to the <em>match</em> API call where a Semantic Signature is generated for the post and matched with Signatures of blogs, news, Wikipedia articles and Amazon products found in our content indexes. Only the best matches are then shown for you to include in your post.';
-
+	helpStrings['textwise_contentlink_help'] = 'The words or phrases in this section appear in the text of your post. Using the power of Semantic Signatures, they have been selected as relevant to the post. Click on the words or phrases below to link that text in your post to the corresponding Wikipedia article on that topic.';
 
 	var objBubble = jQuery('#textwise_bubble');
 	var objWindow = jQuery(window);

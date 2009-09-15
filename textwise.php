@@ -3,7 +3,7 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://www.semantichacker.com/widget-plugin/wordpress-plugin
 Description: SemanticHacker API integration for WordPress 2.x
-Version: 0.9.6
+Version: 0.9.8
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
@@ -27,9 +27,6 @@ Author URI: http://www.textwise.com/
 
 define('TEXTWISE_API_URL', 'http://api.semantichacker.com/');
 define('TEXTWISE_AMAZON_REF', 'textwiseco23-20');
-
-//Plugin initialization
-//register_activation_hook(__FILE__, 'textwise_activation');
 
 //Load CSS and code for article output
 add_action('wp_head', 'textwise_global_header');
@@ -216,7 +213,6 @@ function textwise_metabox_position($force = false) {
 					unset($usermeta_normal[$i]);
 				}
 			}
-//			for($i=0; $i<count($usermeta_side); $i++)
 			for($i=count($usermeta_side); $i>=0; $i--)
 			{
 				if (in_array($usermeta_side[$i], $mb_side) || $usermeta_side[$i] == '') {
@@ -242,7 +238,6 @@ function textwise_metabox_position($force = false) {
 			$metaboxorder['normal'] = implode(',', $usermeta_normal);
 			$metaboxorder['side'] = implode(',', $usermeta_side);
 
-//			$metaboxorder = serialize($metaboxorder);
 			update_user_option( $current_user->ID, "metaboxorder_post", $metaboxorder );
 			update_option('textwise_box_position', '0');
 		}
@@ -472,9 +467,9 @@ function textwise_ajax_content_update() {
 	if (get_option('textwise_category_enable') == '1') {
 		$result = $api->category($api_req);
 		$cat_results = null;
-		if(isset($result['categories'])) 
+		if(isset($result['categories']))
 			$cat_results = $result['categories'];
-		else 
+		else
 			$cat_results = array();
 		$arrCategories = array();
 		foreach ($cat_results as $c) {
@@ -497,9 +492,9 @@ function textwise_ajax_content_update() {
 		$result = $api->match($api_req);
 		$vidString = "{title: '%s', thumbnailUrl: '%s', enclosureUrl: '%s', landingPageUrl: '%s', videoId: '%s'}";
 		$vid_results = null;
-                if(isset($result['matches'])) 
+                if(isset($result['matches']))
                         $vid_results = $result['matches'];
-                else 
+                else
                         $vid_results = array();
 		$arrVideos = array();
 		foreach ($vid_results as $m) {
@@ -535,7 +530,7 @@ function textwise_ajax_content_update() {
 		$result = $api->match($api_req);
 		$imgString = "{title:'%s', thumbnailUrl:'%s', landingPageUrl:'%s', imageUrl:'%s', source:'%s'}";
 		$img_results = null;
-		if(isset($result['matches'])) 
+		if(isset($result['matches']))
 			$img_results = $result['matches'];
 		else
 			$img_results = array();
@@ -567,9 +562,9 @@ function textwise_ajax_content_update() {
 		$result = $api->match($api_req);
 		$rssString = "{title:'%s', description:'%s', landingPageUrl:'%s', channelTitle: '%s', channelLink: '%s'}";
 		$bnews_results = null;
-		if(isset($result['matches'])) 
+		if(isset($result['matches']))
 			$bnews_results = $result['matches'];
-		else 
+		else
 			$bnews_results = array();
 		$arrRss = array();
 		foreach ($bnews_results as $m) {
@@ -598,7 +593,7 @@ function textwise_ajax_content_update() {
 		$result = $api->match($api_req);
 		$wikiString = "{title:'%s', description:'%s', landingPageUrl:'%s', channelTitle: '%s', channelLink: '%s'}";
 		$wiki_results = null;
-		if(isset($result['matches'])) 
+		if(isset($result['matches']))
 			$wiki_results = $result['matches'];
 		else
 			$wiki_results = array();
@@ -629,9 +624,9 @@ function textwise_ajax_content_update() {
 		$api_req['fields'] = 'title,description,landingPageUrl,imageUrl';
 		$result = $api->match($api_req);
 		$prod_results = null;
-		if(isset($result['matches'])) 
+		if(isset($result['matches']))
 			$prod_results = $result['matches'];
-		else 
+		else
 			$prod_results = array();
 
 		$prodString = "{title:'%s', description:'%s', landingPageUrl:'%s', imageUrl:'%s'}";
