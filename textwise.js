@@ -20,8 +20,8 @@ var textwise_settings = {
 	offLeft: 30,
 	lastHover: false,
 	tagchecklist: '#tagchecklist',
-	taginput: '#tags-input',
-}
+	taginput: '#tags-input'
+};
 
 jQuery(document).ready(textwise_init);
 
