@@ -89,9 +89,13 @@ You may change these options in the Settings section. Please note that videos, i
 
 = How will the results appear on my customized theme? =
 
-Elements added to the blog by the TextWise plugin have been designed to conform to your selected theme as seamlessly as possible. To select the logo that best fits with your theme, please see the Settings screen for variations. Your mileage may vary.
+Elements added to the blog by the TextWise plugin have been designed to conform to your selected theme as seamlessly as possible. To select the logo that best fits with your theme, please see the Settings screen for variations.
 
-To further customize the stylesheet, you may modify the `textwise_post.css` file in the plugin directory.
+To further customize the stylesheet, you may modify the `textwise_post.css` file in the plugin directory, `<blog directory>/wp-content/plugins/textwise/`.
+
+= Can the plugin be used along with other plugins? =
+
+While the plugin has been tested with different themes and plugins, we cannot guarantee that conflicts won't occur. We [encourage your feedback](http://www.semantichacker.com/forums/bugs) to help us improve the plugin.
 
 == Screenshots ==
 

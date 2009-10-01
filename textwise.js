@@ -529,11 +529,8 @@ function textwise_link_toggle() {
 	var term = jQuery(this).text();
 	var re_term_esc = new RegExp('([\\\\\\|\\(\\)\\[\\{\\^\\$\\*\\+\\?\\.])', 'g');
 	var esc_term = term.replace(re_term_esc, '\\$1');
-//	var re_term = new RegExp('([^<>]*?(<.*?>)?[^<>]*?)(\\b|[^\\w])('+esc_term+')(\\b|[^\\w])', 'i');
-//	var newTag = '$1$3<a class="tw_contentlink" href="http://en.wikipedia.org/wiki/$4">$4</a>$5';
 	var re_term = new RegExp('(\\b|[^\\w])('+esc_term+')(\\b|[^\\w])', 'i');
-	var newTag = '$1<a class="tw_contentlink" href="http://en.wikipedia.org/wiki/$2">$2</a>$3';
-
+	var newTag = '$1<a class="tw_contentlink" href="http://en.wikipedia.org/w/index.php?search=$2&go=Go">$2</a>$3';
 	var rich = (textwise_getEditor() == 'tinymce');
 	var i_dom = textwise_getIDom();
 	var tw_links = [];
@@ -1419,7 +1416,7 @@ function textwise_help_bubble() {
 	helpStrings['textwise_video_help'] = 'The text of your post is used as input to the <em>match</em> API call where a Semantic Signature is generated for the post and matched with Signatures of videos found in our content indexes. Only the best matches are then shown for you to include in your post.';
 	helpStrings['textwise_image_help'] = 'The text of your post is used as input to the <em>match</em> API call where a Semantic Signature is generated for the post and matched with Signatures of images in our content indexes. Only the best matches are then shown for you to include in your post.';
 	helpStrings['textwise_link_help'] = 'The text of your post is used as input to the <em>match</em> API call where a Semantic Signature is generated for the post and matched with Signatures of blogs, news, Wikipedia articles and Amazon products found in our content indexes. Only the best matches are then shown for you to include in your post.';
-	helpStrings['textwise_contentlink_help'] = 'The words or phrases in this section appear in the text of your post. Using the power of Semantic Signatures, they have been selected as relevant to the post. Click on the words or phrases below to link that text in your post to the corresponding Wikipedia article on that topic.';
+	helpStrings['textwise_contentlink_help'] = 'The words or phrases in this section appear in the text of your post. Using the power of Semantic Signatures, they have been selected as relevant to the post. Click on the words or phrases below to link that text in your post to the corresponding Wikipedia article on that topic.<br><br>Wordpress also provides the ability to edit the content links if the suggestions are not exactly what you want for your post.';
 
 	var objBubble = jQuery('#textwise_bubble');
 	var objWindow = jQuery(window);

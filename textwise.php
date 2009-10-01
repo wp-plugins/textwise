@@ -3,11 +3,11 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://www.semantichacker.com/widget-plugin/wordpress-plugin
 Description: SemanticHacker API integration for WordPress 2.x
-Version: 0.9.8
+Version: 0.9.9
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
-	Copyright 2008  TextWise, LLC.  ( email : admin@semantichacker.com )
+	Copyright 2008-2009  TextWise, LLC.  ( email : admin@semantichacker.com )
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

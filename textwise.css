@@ -21,7 +21,7 @@
 #textwise_cats a { color: #696969; padding: 0px 1em; cursor: pointer; }
 #textwise_cats a:hover { color: #000000; }
 #textwise_cats a.selected { background: #fc2fa6; -moz-border-radius: .5em; color: #ffffff; }
-#textwise_cats a.selected:hover { color: 000000; }
+#textwise_cats a.selected:hover { color: #000000; }
 
 .clear { clear: both; }
 .clearleft { clear: left; }
