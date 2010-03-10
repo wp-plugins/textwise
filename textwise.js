@@ -1,5 +1,5 @@
 /*************************
-* (c) 2008 TextWise, LLC *
+* (c) 2008-2010 TextWise, LLC *
 *************************/
 
 //Case insensitive 'contains' matches
@@ -38,6 +38,10 @@ function textwise_init() {
 	textwise_dataobject.cat_enable = (textwise_dataobject.cat_enable == 1) && jQuery('#categories-all').length ? 1 : 0;
 	textwise_dataobject.contentlink_enable = (textwise_dataobject.contentlink_enable == 1) && jQuery('#postdivrich').length ? 1 : 0;
 
+	//Redefine function from WP core to be compatible with 2.9+
+	if (typeof new_tag_remove_tag != 'function') { new_tag_remove_tag = function(el){ tagBox.parseTags(this); } }
+	if (typeof tag_update_quickclicks != 'function') { tag_update_quickclicks = function(el){ tagBox.quickClicks(document.getElementById('post_tag'));} }
+
 	//Add content to existing elements.
 	var helpImage = function(id){ return '<img id="'+id+'" class="textwise_help" src="'+textwise_settings.pluginDir+'/img/help.gif" alt="(?)" />';};
 	//Tags
@@ -61,12 +65,25 @@ function textwise_init() {
 
 	//Content links
 	if (textwise_dataobject.contentlink_enable == 1) {
-		jQuery('#postdivrich').append('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_link.gif" alt="TextWise Content Link Suggestions" /></em>'+helpImage('textwise_contentlink_help')+'</p><ul id="textwise_contentlinks"></li></ul></div><br class="clearleft"/>');
+		//jQuery('#postdivrich').append('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_link.gif" alt="TextWise Content Link Suggestions" /></em>'+helpImage('textwise_contentlink_help')+'</p><ul id="textwise_contentlinks"></li></ul></div><br class="clearleft"/>');
+
+		//Check for metabox in 2.7+ or append to postdivrich
+		if (jQuery('#textwise_contentlinks_container').length) {
+			jQuery('#textwise_contentlinks_container').append('<ul id="textwise_contentlinks"></li></ul><br class="clearleft"/>');
+		} else {
+			jQuery('#postdivrich').append('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_link.gif" alt="TextWise Content Link Suggestions" /></em>'+helpImage('textwise_contentlink_help')+'</p><ul id="textwise_contentlinks"></li></ul></div><br class="clearleft"/>');
+		}
 	}
 
 	//Image and video tag enhancement
 	var titleBar;
 	var tagLine = ' <em>- powered by TextWise Similarity Search</em>';
+
+	if (textwise_dataobject.image_enable == 1 && (titleBar = jQuery('#textwise_metabox_contentlinks h3'))) {
+		titleBar = (titleBar.find('span').length) ? titleBar.find('span') : titleBar;
+		titleBar.append(tagLine +' '+helpImage('textwise_contentlink_help'));
+	}
+
 	if (textwise_dataobject.image_enable == 1 && (titleBar = jQuery('#textwise_metabox_images h3'))) {
 		titleBar = (titleBar.find('span').length) ? titleBar.find('span') : titleBar;
 		titleBar.append(tagLine +' '+helpImage('textwise_image_help'));
@@ -75,7 +92,7 @@ function textwise_init() {
 		titleBar = (titleBar.find('span').length) ? titleBar.find('span') : titleBar;
 		titleBar.append(tagLine +' '+helpImage('textwise_video_help'));
 	}
-	if ( (textwise_dataobject.rss_enable == 1 || textwise_dataobject.wiki_enable == 1 || textwise.dataobject.product_enable == 1)
+	if ( (textwise_dataobject.rss_enable == 1 || textwise_dataobject.wiki_enable == 1 || textwise_dataobject.product_enable == 1)
 		&& (titleBar = jQuery('#textwise_metabox_links h3'))) {
 		titleBar = (titleBar.find('span').length) ? titleBar.find('span') : titleBar;
 		titleBar.append(tagLine +' '+helpImage('textwise_link_help'));
@@ -181,8 +198,9 @@ function textwise_getContent() {
 	post_content = post_content.replace(/\[(?:wp_)?caption([^\]]+)\]([\s\S]+?)\[\/(?:wp_)?caption\][\s\u00a0]*/g, '');
 
 	//Strip default captions. Include user-defined captions in semantic search
-	post_content = post_content.replace(/>Source: Wikipedia</g, '><');
-	post_content = post_content.replace(/>Source: Flickr</g, '><');
+//	post_content = post_content.replace(/>Source: Wikipedia</g, '><');
+//	post_content = post_content.replace(/>Source: Flickr</g, '><');
+	post_content = post_content.replace(/<dd .*?wp-caption-dd.*?>.*?<\/dd>/gi, '');
 	var result = post_title+' '+post_content;
 	if (result == ' ' || result == ' <p><br mce_bogus="1"></p>') { result = ''; }
 	return result;
@@ -354,6 +372,7 @@ function textwise_contentUpdateCallback(response) {
 						}
 					});
 					jQuery('#textwise_contentlinks a').click(textwise_link_toggle);
+					jQuery('#textwise_metabox_contentlinks').removeClass('closed');
 					break;
 				case 'categories':
 					if (textwise_dataobject.cat_enable != 1) break;
@@ -396,7 +415,7 @@ function textwise_contentUpdateCallback(response) {
 					jQuery('#textwise_video_table .tw_thumbcell').click(textwise_video_toggle)
 						.hover(textwise_video_hover, textwise_hoverend)
 						.mousemove(textwise_preview_track);
-					jQuery('#textwise_videos').removeClass('closed');
+					jQuery('#textwise_metabox_videos').removeClass('closed');
 					break;
 				case 'images':
 					if (textwise_dataobject.image_enable != 1) break;
@@ -413,7 +432,7 @@ function textwise_contentUpdateCallback(response) {
 						.hover(textwise_image_hover, textwise_hoverend)
 						.mousemove(textwise_preview_track);
 
-					jQuery('#textwise_images').removeClass('closed');
+					jQuery('#textwise_metabox_images').removeClass('closed');
 					break;
 				case 'rss':
 					if (textwise_dataobject.rss_enable != 1) break;
@@ -674,6 +693,9 @@ function textwise_sync_tag_list() {
 function textwise_wptag_remove() {
 	var id = jQuery( this ).attr( 'id' );
 	var num = id.substr( 10 );
+	if (isNaN(num)) {
+		num = id.split('-check-num-')[1];	//For 2.9+
+	}
 	var current_tags = jQuery( textwise_settings.taginput ).val().split(',');
 	var tw_taglist = jQuery('#textwise_tag_input').val();
 	var tw_tags = tw_taglist.split(',');
@@ -802,6 +824,8 @@ function textwise_sync_image_list() {
 	var image_meta = textwise_deserialize_metablock(jQuery('#textwise_image_input').val());
 	var image_meta_final = [];
 	jQuery.each(image_meta, function(i, objImg){
+//		alert(imagelist[0]);
+//		alert(objImg.imageUrl);
 		if (jQuery.inArray(objImg.imageUrl, imagelist) != -1) {
 			tableImg.append(textwise_html_image(objImg, true));
 			image_meta_final.push(objImg);
@@ -822,17 +846,9 @@ function textwise_image_toggle(e) {
 	var imageData = textwise_deserialize_metablock(jQuery('#textwise_image_input').val());
 //	var rich = (typeof tinyMCE != 'undefined' && tinyMCE.getInstanceById('content'));
 	var rich = (textwise_getEditor() == 'tinymce');
-	var i_dom;
 
 	//Get the DOM from either editor
-	if ( rich ) {
-		tinyMCE.activeEditor.getDoc().ignoreDOM = true;
-		var ed = tinyMCE.activeEditor;
-		textwise_getContent();	//Refresh/re-render
-		i_dom = jQuery(ed.getBody());
-	} else {
-		i_dom = jQuery('<div>'+jQuery('#content').val()+'</div>');
-	}
+	var i_dom = textwise_getIDom();
 
 	//Find the image based on the selection
 	var editor_images = [];
@@ -860,6 +876,9 @@ function textwise_image_toggle(e) {
 		jQuery(this).removeClass('selected');
 	} else {
 	//Add to content
+		//Render to check src processing
+		imageObj.imageUrl = textwise_real_image_url(imageObj.imageUrl);
+
 		if ( rich ) {
 			htmlTag = textwise_imageInsert(imageObj, true);
 			tinyMCE.activeEditor.focus(false);
@@ -888,14 +907,15 @@ function textwise_image_toggle(e) {
 }
 
 function textwise_imageInsert(imageObj, withCaption) {
-	withCaption = withCaption ? withCaption : true;
+	withCaption = typeof(withCaption) != 'undefined' ? withCaption : true;
+
 	var htmlTag = '';
 	var caption = 'Source: ' + imageObj.source;
 	var imageWidth = 200;
 	var imageLoader = new Image();
 	imageLoader.src = imageObj.thumbnailUrl;
 	var imageAspect = imageLoader.height / imageLoader.width;
-	var imageHeight = parseInt(imageWidth * imageAspect);
+	var imageHeight = isNaN(parseInt(imageWidth * imageAspect)) ? '' : parseInt(imageWidth * imageAspect);
 	htmlTag = '<img class="tw_selimg" title="'+textwise_html_esc(imageObj.title)
 		+'" src="'+textwise_html_esc(imageObj.imageUrl)
 		+'" mce_src="'+textwise_html_esc(imageObj.imageUrl)+'" alt="'+textwise_html_esc(caption)
@@ -905,6 +925,13 @@ function textwise_imageInsert(imageObj, withCaption) {
 		htmlTag = '<div class="mceTemp"><dl id="" class="wp-caption alignnone" style="width: 210px;"><dt class="wp-caption-dt">'+htmlTag+'</dt><dd class="wp-caption-dd">'+caption+'</dd></dl></div>';
 	}
 	return htmlTag;
+}
+
+//Let the browser load the image and normalize the URL string.
+function textwise_real_image_url(url) {
+	var imageloader = new Image();
+	imageloader.src = url
+	return imageloader.src;
 }
 
 function textwise_image_hover(e) {
@@ -1411,7 +1438,7 @@ function textwise_html_product(objLink, selected) {
 /** Help bubbles **/
 function textwise_help_bubble() {
 	var helpStrings = {};
-	helpStrings['textwise_tag_help'] = 'The Semantic Hacker API goes beyond inaccurate, labor-intensive keyword or folksonomy categorization systems.. These categories are useful for content categorization and site navigation. Only the best matches are then shown for you to include in your post.';
+	helpStrings['textwise_tag_help'] = 'Concept tags are significant-term tags which are derived from your content\'s Semantic Signature, created from its original text.  Move your mouse over one of the suggestions to see its similarity strength to your post.  They can be selected to add to your post\'s tags.';
 	helpStrings['textwise_cat_help'] = 'The Semantic Hacker API goes beyond inaccurate, labor-intensive keyword or folksonomy categorization systems.. These categories are useful for content categorization and site navigation. Only the best matches are then shown for you to include in your post.';
 	helpStrings['textwise_video_help'] = 'The text of your post is used as input to the <em>match</em> API call where a Semantic Signature is generated for the post and matched with Signatures of videos found in our content indexes. Only the best matches are then shown for you to include in your post.';
 	helpStrings['textwise_image_help'] = 'The text of your post is used as input to the <em>match</em> API call where a Semantic Signature is generated for the post and matched with Signatures of images in our content indexes. Only the best matches are then shown for you to include in your post.';

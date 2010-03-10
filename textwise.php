@@ -3,11 +3,11 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://www.semantichacker.com/widget-plugin/wordpress-plugin
 Description: SemanticHacker API integration for WordPress 2.x
-Version: 0.9.9
+Version: 1.0.4
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
-	Copyright 2008-2009  TextWise, LLC.  ( email : admin@semantichacker.com )
+	Copyright 2008-2010  TextWise, LLC.  ( email : admin@semantichacker.com )
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,8 +43,17 @@ add_filter('plugin_action_links_textwise/textwise.php', 'textwise_plugin_links' 
 //Load when in admin section
 add_action('admin_init', 'textwise_admin_init');
 
-//Load on editor pages only, if token exists
-if ( get_option('textwise_api_token') ) {
+//Load on editor pages only, if token exists and is valid, and any service is enabled.
+if ( get_option('textwise_api_token') && get_option('textwise_api_token_invalid') == 'n' &&
+		( get_option('textwise_tag_enable') == '1' ||
+			get_option('textwise_contentlink_enable') == '1' ||
+			get_option('textwise_category_enable') == '1' ||
+			get_option('textwise_video_enable') == '1' ||
+			get_option('textwise_image_enable') == '1' ||
+			get_option('textwise_rss_enable') == '1' ||
+			get_option('textwise_wiki_enable') == '1' ||
+			get_option('textwise_product_enable') == '1' )
+	) {
 	add_action('load-post.php', 'textwise_init_editor');
 	add_action('load-post-new.php', 'textwise_init_editor');
 }
@@ -62,6 +71,7 @@ function textwise_admin_init() {
 	//Set defaults
 	//Won't affect existing settings
 	add_option('textwise_api_token', '');
+	add_option('textwise_api_token_invalid', 'c');	//States: n=Valid, y=Invalid, c=Check on next run
 	add_option('textwise_amazon_ref', '');
 	add_option('textwise_tag_enable', '1');
 	add_option('textwise_contentlink_enable', '1');
@@ -81,6 +91,7 @@ function textwise_admin_init() {
 	//For use in 2.7+
 	if (function_exists('register_setting')) {
 		register_setting('textwise', 'textwise_api_token');
+		register_setting('textwise', 'textwise_api_token_invalid');
 		register_setting('textwise', 'textwise_amazon_ref');
 		register_setting('textwise', 'textwise_tag_enable');
 		register_setting('textwise', 'textwise_contentlink_enable');
@@ -101,6 +112,10 @@ function textwise_admin_init() {
 		$force = (get_option('textwise_box_position') == '1') ? true : false;
 		textwise_metabox_position($force);
 	}
+
+//	if ( get_option('textwise_api_token_invalid') == 'c' ) {
+//		textwise_verify_token();
+//	}
 }
 
 // Add a link to this plugin's settings page (2.7+)
@@ -113,9 +128,50 @@ function textwise_plugin_links($links) {
 
 //
 function textwise_check_token() {
+//	$token = $_POST['textwise_api_token'];
+//	if ($token && $token != get_option('textwise_api_token')) {
+//		textwise_verify_token();
+//	}
+
+	if (get_option('textwise_api_token_invalid') == 'c') { textwise_verify_token(); }
+
+	$infoUrl = get_bloginfo('wpurl'). '/wp-admin/options-general.php?page=textwise/textwise-settings.php';
+	$message = '';
 	if (!get_option('textwise_api_token')) {
-		$infoUrl = get_bloginfo('wpurl'). '/wp-admin/options-general.php?page=textwise/textwise-settings.php';
-		echo '<div class="updated"><p><b>TextWise:</b> API Token missing. Learn about this and other plugin options <a href="'.$infoUrl.'">here</a>.</p></div>';
+		$message = 'API Token missing. Learn about this and other plugin options <a href="'.$infoUrl.'">here</a>.';
+	} elseif (get_option('textwise_api_token_invalid') === 'y') {
+		$message = 'API Token is invalid. Please correct it in the <a href="'.$infoUrl.'">settings</a>.';
+	}
+
+	if ($message != '') {
+		echo '<div class="updated"><p><b>TextWise:</b> '.$message.'</p></div>';
+	}
+}
+
+if ($_POST['textwise_api_token'] && $_POST['textwise_api_token'] != get_option('textwise_api_token') ) {
+	update_option('textwise_api_token_invalid', 'c');
+}
+
+function textwise_verify_token() {
+	$token = get_option('textwise_api_token');
+	if ($token == '') {
+		update_option('textwise_api_token_invalid', 'y');
+	} else {
+		$api = textwise_create_api();
+		$api_req['c'] = 'wp';
+		$api_req['content'] = '';
+
+		//Make request to TextWise API for Signature
+		$api = textwise_create_api();
+		$result = $api->signature($api_req);
+
+		if ($result['message']['code'] == '102') {
+			$invalid = 'y';
+		} else {
+			$invalid = 'n';
+		}
+
+		update_option('textwise_api_token_invalid', $invalid);
 	}
 }
 
@@ -157,7 +213,7 @@ function textwise_init_editor() {
 	add_action('save_post', 'textwise_savepost');
 	add_action('admin_footer', 'textwise_admin_footer');
 
-	//Necessary for 2.7+ but introduced somewhere in the 2.x generation..
+	//Necessary for 2.7+ but introduced somewhere between 2.6.1 - 2.6.4
 	if (function_exists('add_meta_box')) {
 		if ($wp_version < '2.7') {
 			$priority = 'low';
@@ -165,6 +221,9 @@ function textwise_init_editor() {
 			$priority = 'high';
 			//Add a special box for the update button in 2.7
 			add_meta_box('textwise_metabox_update', 'TextWise Similarity Search', 'textwise_metabox_update', 'post', 'side', 'high');
+		}
+		if (get_option('textwise_contentlink_enable') == '1') {
+			add_meta_box('textwise_metabox_contentlinks', 'Content Link Suggestions', 'textwise_metabox_contentlinks', 'post', 'normal', 'high');
 		}
 		if (get_option('textwise_image_enable') == '1') {
 			add_meta_box('textwise_metabox_images', 'Image Suggestions', 'textwise_metabox_images', 'post', 'normal', $priority);
@@ -189,7 +248,7 @@ function textwise_metabox_update() {
 function textwise_metabox_position($force = false) {
 	global $current_user, $table_prefix, $wp_version;
 	//tagsdiv,categorydiv
-	$mb_normal = array('textwise_metabox_images', 'textwise_metabox_videos', 'textwise_metabox_links');
+	$mb_normal = array('textwise_metabox_contentlinks', 'textwise_metabox_images', 'textwise_metabox_videos', 'textwise_metabox_links');
 	$mb_side = array('textwise_metabox_update');
 	if ($wp_version < '2.7') {
 		$mb_normal = array_merge(array('tagdiv', 'categorydiv'), $mb_normal);
@@ -209,13 +268,17 @@ function textwise_metabox_position($force = false) {
 		if ($force) {
 			for($i=count($usermeta_normal); $i>=0; $i--)
 			{
-				if (in_array($usermeta_normal[$i], $mb_normal) || $usermeta_normal[$i] == '') {
+				if (in_array($usermeta_normal[$i], $mb_normal) ||
+					in_array($usermeta_normal[$i], $mb_side) ||
+				 	$usermeta_normal[$i] == '') {
 					unset($usermeta_normal[$i]);
 				}
 			}
 			for($i=count($usermeta_side); $i>=0; $i--)
 			{
-				if (in_array($usermeta_side[$i], $mb_side) || $usermeta_side[$i] == '') {
+				if (in_array($usermeta_side[$i], $mb_side) ||
+					in_array($usermeta_side[$i], $mb_normal) ||
+					$usermeta_side[$i] == '') {
 					unset($usermeta_side[$i]);
 				}
 			}
@@ -246,6 +309,9 @@ function textwise_metabox_position($force = false) {
 
 }
 
+function textwise_metabox_contentlinks() {
+	echo '<div id="textwise_contentlinks_container"></div>';
+}
 
 function textwise_metabox_videos() {
 	global $post_ID;
@@ -304,6 +370,7 @@ function textwise_metabox_links() {
 <?php
 }
 
+//Used in 2.6 and earlier only
 function textwise_postboxes() {
 	if (get_option('textwise_image_enable') == '1') {?>
 <div id="textwise_metabox_images" class="postbox closed">
