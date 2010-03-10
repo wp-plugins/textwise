@@ -2,7 +2,7 @@
 Contributors: textwise
 Tags: semantic, admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, articles
 Requires at least: 2.6.1
-Tested up to: 2.8.5
+Tested up to: 2.9.2
 Stable tag: 0.9.9
 
 Use the power of TextWise Similarity Search technology to find related images, videos, and other content to your blog post as you edit.
@@ -11,30 +11,31 @@ Use the power of TextWise Similarity Search technology to find related images, v
 
 Create better posts with our Similarity Search plugin for Wordpress. The plugin automatically suggests related content as you write.
 
-* Generate related category and tagging phrases
-* Enhance your post with images, links, and videos from Wikipedia, Flickr, and YouTube
-* Add related links to pages on Wikipedia, Amazon, and thousands of news and blog websites
+* Generate related categories and concept tags
+* Enhance your post with images and videos from Wikipedia, Flickr, YouTube, and more
+* Add related links to Wikipedia and thousands of news and blog websites
+* Link to related products available from Amazon using your Affiliate ID
 
 = Features =
 
-* **Content links** automatically link terms from your post text to link to Wikipedia
-* **Tag suggestions** pull out the best phrases from your post to describe it
-* **Category suggestions** find the bigger picture
-* **Image suggestions** add visual meaning with picks from Wikipedia and Flickr
-* **Video suggestions** bring movement and sound from YouTube
-* **Related Blogs &amp; News suggestions** offer the top articles about your topic
-* **Related Wikipedia Article suggestions** further research with content about your subject
-* **Related Amazon suggestions** optionally show the relevant products to your readers
+* **Content link suggestions** link terms from your post to Wikipedia
+* **Tag suggestions** describe your post using your most important words and phrases
+* **Category suggestions** link your posts by subject
+* **Image suggestions** illustrate your post with photos and graphics
+* **Video suggestions** add multimedia content from YouTube
+* **Related Blogs &amp; News suggestions** link to the best articles on your topic
+* **Related Wikipedia Article suggestions** provide further research about your subject
+* **Related Amazon suggestions** show readers relevant products available for purchase
 
 = Configuration &amp; Customization =
 
-The plugin provides a number of customization options to work within your needs.
+The plugin provides a number of customization options to fit your needs.
 
-* Control which types of content you want suggested and how often those suggestions are updated
-* Customize the appearance of our suggestions to fix your theme
-* Use your own Amazon referral ID to profit from your product suggestions
+* Control which types of content you want suggested and how often they are updated
+* Customize the appearance of our suggestions to match your theme
+* Use your own Amazon Affiliate ID to profit from your product suggestions
 
-Once the plugin is installed and activated, look for the Textwise section under Settings in the Wordpress administrative section.
+Once the plugin is installed and activated, look for the TextWise section under Settings in the Wordpress administrative section to get started.
 
 = Contributors =
 * Jeff Brand, Delta Factory
