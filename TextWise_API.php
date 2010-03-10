@@ -61,6 +61,12 @@ class TextWise_API
         $url .= $this->_token . '/';
         $url .= $service;
 
+
+        if ( ($service == 'filter' || $service == 'concept') && isset($parameters['content']) ) {
+        	$badchars = array('"', "'");
+        	$parameters['content'] = str_replace($badchars, ' ', $parameters['content']);
+        }
+
 		//Append additional settings (Configuration/Index Id) depending on service
 		switch ($service) {
 			case 'signature':
