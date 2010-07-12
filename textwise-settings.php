@@ -39,15 +39,16 @@ function textwise_opt_logo() {
 			<tr valign="top">
 				<th scope="row">Select TextWise Content Suggestions</th>
 				<td>Choose how you would like TextWise help you enhance your blog and post content.<br />
-					<input type="checkbox" id="textwise_category_enable" name="textwise_category_enable" value="1" <?php echo ( get_option('textwise_category_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_category_enable">Categories</label><br />
-					<input type="checkbox" id="textwise_tag_enable" name="textwise_tag_enable" value="1" <?php echo ( get_option('textwise_tag_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_tag_enable">Tags</label><br />
-					<input type="checkbox" id="textwise_contentlink_enable" name="textwise_contentlink_enable" value="1" <?php echo ( get_option('textwise_contentlink_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_contentlink_enable">Content Links</label><br />
-					<input type="checkbox" id="textwise_video_enable" name="textwise_video_enable" value="1" <?php echo ( get_option('textwise_video_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_video_enable">Videos</label><br />
-					<input type="checkbox" id="textwise_image_enable" name="textwise_image_enable" value="1" <?php echo ( get_option('textwise_image_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_image_enable">Images</label><br />
+					<input type="checkbox" id="textwise_category_enable" name="textwise_category_enable" value="1" <?php echo ( get_option('textwise_category_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_category_enable">Categories*</label><br />
+					<input type="checkbox" id="textwise_tag_enable" name="textwise_tag_enable" value="1" <?php echo ( get_option('textwise_tag_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_tag_enable">Tags*</label><br />
+					<input type="checkbox" id="textwise_contentlink_enable" name="textwise_contentlink_enable" value="1" <?php echo ( get_option('textwise_contentlink_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_contentlink_enable">Content Links*</label><br />
+					<input type="checkbox" id="textwise_video_enable" name="textwise_video_enable" value="1" <?php echo ( get_option('textwise_video_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_video_enable">Videos*</label><br />
+					<input type="checkbox" id="textwise_image_enable" name="textwise_image_enable" value="1" <?php echo ( get_option('textwise_image_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_image_enable">Images*</label><br />
 					<input type="checkbox" id="textwise_rss_enable" name="textwise_rss_enable" value="1" <?php echo ( get_option('textwise_rss_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_rss_enable">Blogs &amp; News</label><br />
 					<input type="checkbox" id="textwise_wiki_enable" name="textwise_wiki_enable" value="1" <?php echo ( get_option('textwise_wiki_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_wiki_enable">Wikipedia</label><br />
 					<input type="checkbox" id="textwise_product_enable" name="textwise_product_enable" value="1" <?php echo ( get_option('textwise_product_enable') == '1') ? 'checked' : ''; ?> /> <label for="textwise_product_enable">Products</label><br />
-
+					<br />
+					* Deselecting these items will not automatically remove previously selected suggestions from your posts.
 				</td>
 			</tr>
 			<tr valign="top">
@@ -87,7 +88,7 @@ function textwise_opt_logo() {
 			</tr>
 			<tr valign="top">
 				<th scope="row">Related Link formatting</th>
-				<td>Some themes (such as Wordpress' default) justify lists which affects the spacing of our results in the article output. How should this be handled?<br />
+				<td>Some themes (such as WordPress' default) justify lists which affects the spacing of our results in the article output. How should this be handled?<br />
 					<label for="textwise_list_css_noforce"><input type="radio" id="textwise_list_css_noforce" name="textwise_list_css" value="0" <?php echo ( get_option('textwise_list_css') != '1') ? 'checked' : ''; ?> /> Follow the theme's stylesheet</label><br />
 					<label for="textwise_list_css_force"><input type="radio" id="textwise_list_css_force" name="textwise_list_css" value="1" <?php echo ( get_option('textwise_list_css') == '1') ? 'checked' : ''; ?> /> Force list items to be left justified</label>
 				</td>
@@ -98,6 +99,14 @@ function textwise_opt_logo() {
 				Some other Dashboard plugins may cause the Textwise plugin to behave erratically. When this is the case, a warning will be displayed.
 				</td>
 			</tr>
+<?php if ( ($GLOBALS['wp_version'] < '2.8.6') ) { ?>
+			<tr valign="top" id="versionwarning">
+				<th scope="row">Plugin Version Warning</th>
+				<td><label for="textwise_version_warning"><input type="checkbox" id="textwise_version_warning" name="textwise_version_warning" value="1" <?php echo ( get_option('textwise_version_warning') == '1') ? 'checked' : ''; ?>> Disable warning</label><br />
+				This plugin has not been tested with your version of WordPress. Use at your own risk.  See <a href="http://wordpress.org/extend/plugins/textwise/">our plugin page</a> for more information.
+				</td>
+			</tr>
+<? } ?>
 			<tr valign="top">
 				<th scope="row">Amazon Referral ID</th>
 				<td><input type="text" name="textwise_amazon_ref" value="<?php echo get_option('textwise_amazon_ref'); ?>"></td>
@@ -110,7 +119,7 @@ function textwise_opt_logo() {
 <? } ?>
 		</table>
 		<input type="hidden" name="action" value="update" />
-		<input type="hidden" name="page_options" value="textwise_api_token,textwise_category_enable,textwise_tag_enable,textwise_contentlink_enable,textwise_video_enable,textwise_image_enable,textwise_rss_enable,textwise_wiki_enable,textwise_product_enable,textwise_logo_place,textwise_use_logo,textwise_autoupdate,textwise_conflict_warning,textwise_amazon_ref,textwise_box_position,textwise_list_css" />
+		<input type="hidden" name="page_options" value="textwise_api_token,textwise_category_enable,textwise_tag_enable,textwise_contentlink_enable,textwise_video_enable,textwise_image_enable,textwise_rss_enable,textwise_wiki_enable,textwise_product_enable,textwise_logo_place,textwise_use_logo,textwise_autoupdate,textwise_conflict_warning,textwise_amazon_ref,textwise_box_position,textwise_list_css,textwise_version_warning" />
 		<p class="submit">
 			<input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" />
 		</p>

@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: TextWise Similarity Search
-Plugin URI: http://www.semantichacker.com/widget-plugin/wordpress-plugin
-Description: SemanticHacker API integration for WordPress 2.x
-Version: 1.0.4
+Plugin URI: http://textwise.com/tools/wordpress-plugin-0
+Description: SemanticHacker API integration for WordPress
+Version: 1.1.1
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
@@ -36,6 +36,7 @@ add_filter('the_content', 'textwise_content_filter');
 add_action('admin_menu', 'textwise_admin_page');
 add_action('admin_notices', 'textwise_check_token');
 add_action('admin_notices', 'textwise_check_detectconflict');
+add_action('admin_notices', 'textwise_check_versions');
 
 //Supported in 2.7+
 add_filter('plugin_action_links_textwise/textwise.php', 'textwise_plugin_links' );
@@ -87,6 +88,7 @@ function textwise_admin_init() {
 	add_option('textwise_conflict_warning', '0');
 	add_option('textwise_box_position', '0');
 	add_option('textwise_list_css', '0');
+	add_option('textwise_version_warning', '0');
 
 	//For use in 2.7+
 	if (function_exists('register_setting')) {
@@ -107,6 +109,7 @@ function textwise_admin_init() {
 		register_setting('textwise', 'textwise_conflict_warning');
 		register_setting('textwise', 'textwise_box_position');
 		register_setting('textwise', 'textwise_list_css');
+		register_setting('textwise', 'textwise_version_warning');
 	}
 	if ( function_exists('add_meta_box') ) {
 		$force = (get_option('textwise_box_position') == '1') ? true : false;
@@ -128,11 +131,6 @@ function textwise_plugin_links($links) {
 
 //
 function textwise_check_token() {
-//	$token = $_POST['textwise_api_token'];
-//	if ($token && $token != get_option('textwise_api_token')) {
-//		textwise_verify_token();
-//	}
-
 	if (get_option('textwise_api_token_invalid') == 'c') { textwise_verify_token(); }
 
 	$infoUrl = get_bloginfo('wpurl'). '/wp-admin/options-general.php?page=textwise/textwise-settings.php';
@@ -199,6 +197,18 @@ function textwise_check_detectconflict() {
 	}
 }
 
+function textwise_check_versions() {
+	global $wp_version;
+//	In case we need to compare plugin version, too.
+//	$plugin = get_plugin_data(WP_PLUGIN_DIR . '/textwise/textwise.php');
+//	$plugin_version = $plugin['Version'];
+	$infoUrl = get_bloginfo('wpurl'). '/wp-admin/options-general.php?page=textwise/textwise-settings.php#versionwarning';
+	if ($wp_version < '2.8.6' && get_option('textwise_version_warning') != 1 ) {
+		echo '<div class="updated"><p><b>Textwise:</b> This version of the Textwise Semantic Plugin has not been tested with your version of WordPress. If you experience any problems, please downgrade to plugin version 1.0.4. <em><a href="'.$infoUrl.'">Disable this warning</a></em></p></div>';
+
+	}
+}
+
 //Add link to plugin settings page
 function textwise_admin_page() {
 	add_options_page('TextWise Plugin', 'TextWise', 8, dirname(__FILE__).'/textwise-settings.php');
@@ -250,38 +260,26 @@ function textwise_metabox_position($force = false) {
 	//tagsdiv,categorydiv
 	$mb_normal = array('textwise_metabox_contentlinks', 'textwise_metabox_images', 'textwise_metabox_videos', 'textwise_metabox_links');
 	$mb_side = array('textwise_metabox_update');
+
+	//Metaboxes were partially implemented, and the tag and category interfaces were normally under the editor
 	if ($wp_version < '2.7') {
 		$mb_normal = array_merge(array('tagdiv', 'categorydiv'), $mb_normal);
 	}
 
-	$mb_normal_missing = array();
-	$mb_side_missing = array();
+	if ($wp_version < '3.0') {
+		$metaboxorder = get_usermeta($current_user->ID, $table_prefix . 'metaboxorder_post');
+	} else {
+		$metaboxorder = get_user_meta($current_user->ID, 'meta-box-order_post', true);
+	}
 
-	$metaboxorder = get_usermeta($current_user->ID, $table_prefix . 'metaboxorder_post');
-//	echo 'hi2:'.$current_user->ID;
-//	print_r($metaboxorder);
 	if ($metaboxorder) {
 		$usermeta_normal = explode(',', $metaboxorder['normal']);
 		$usermeta_side = explode(',', $metaboxorder['side']);
 
 		//Remove textwise metabox keys from lists..
 		if ($force) {
-			for($i=count($usermeta_normal); $i>=0; $i--)
-			{
-				if (in_array($usermeta_normal[$i], $mb_normal) ||
-					in_array($usermeta_normal[$i], $mb_side) ||
-				 	$usermeta_normal[$i] == '') {
-					unset($usermeta_normal[$i]);
-				}
-			}
-			for($i=count($usermeta_side); $i>=0; $i--)
-			{
-				if (in_array($usermeta_side[$i], $mb_side) ||
-					in_array($usermeta_side[$i], $mb_normal) ||
-					$usermeta_side[$i] == '') {
-					unset($usermeta_side[$i]);
-				}
-			}
+			$usermeta_normal = array_diff($usermeta_normal, $mb_normal, $mb_side, array(''));
+			$usermeta_side = array_diff($usermeta_side, $mb_normal, $mb_side, array(''));
 		}
 
 		$updatesetting = false;
@@ -301,7 +299,11 @@ function textwise_metabox_position($force = false) {
 			$metaboxorder['normal'] = implode(',', $usermeta_normal);
 			$metaboxorder['side'] = implode(',', $usermeta_side);
 
-			update_user_option( $current_user->ID, "metaboxorder_post", $metaboxorder );
+			if ($wp_version < '3.0') {
+				update_user_option( $current_user->ID, "metaboxorder_post", $metaboxorder );
+			} else {
+				update_user_meta( $current_user->ID, 'meta-box-order_post', $metaboxorder );
+			}
 			update_option('textwise_box_position', '0');
 		}
 
@@ -515,7 +517,7 @@ function textwise_ajax_content_update() {
 		$filter = $api->filter($api_req);
 		$arrContentLinks = array();
 
-//		echo $filter['filteredText']
+//		echo $filter['filteredText'];
 		foreach ($result['concepts'] as $c) {
 			$arrContentLinks[] = textwise_esc_json(substr($filter['filteredText'], $c['positions'][0]['start'], $c['positions'][0]['end'] - $c['positions'][0]['start']+1));
 		}

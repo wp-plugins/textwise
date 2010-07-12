@@ -20,7 +20,8 @@ var textwise_settings = {
 	offLeft: 30,
 	lastHover: false,
 	tagchecklist: '#tagchecklist',
-	taginput: '#tags-input'
+	taginput: '#tags-input',
+	catlist: '#categories-all'
 };
 
 jQuery(document).ready(textwise_init);
@@ -34,8 +35,18 @@ function textwise_init() {
 		textwise_settings.tagchecklist = '.tagchecklist';
 		textwise_settings.taginput = '#tax-input\\[post_tag\\]';
 	}
+	//Handle change for WP 3.0 taxonomy structure
+	if (!jQuery(textwise_settings.taginput).length) {
+		textwise_settings.taginput = '#tax-input-post_tag';
+	}
+	//Category container change for WP 3.0
+	if (!jQuery(textwise_settings.catlist).length) {
+		textwise_settings.catlist = '#category-all';
+	}
+
+	//Enable feature only if right elements are in place.
 	textwise_dataobject.tag_enable = (textwise_dataobject.tag_enable == 1) && jQuery(textwise_settings.tagchecklist).length ? 1 : 0;
-	textwise_dataobject.cat_enable = (textwise_dataobject.cat_enable == 1) && jQuery('#categories-all').length ? 1 : 0;
+	textwise_dataobject.cat_enable = (textwise_dataobject.cat_enable == 1) && jQuery(textwise_settings.catlist).length ? 1 : 0;
 	textwise_dataobject.contentlink_enable = (textwise_dataobject.contentlink_enable == 1) && jQuery('#postdivrich').length ? 1 : 0;
 
 	//Redefine function from WP core to be compatible with 2.9+
@@ -55,7 +66,7 @@ function textwise_init() {
 	}
 	//Categories
 	if (textwise_dataobject.cat_enable == 1) {
-		jQuery('#categories-all').after('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_category.gif" alt="Category Suggestions" />'
+		jQuery(textwise_settings.catlist).after('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_category.gif" alt="Category Suggestions" />'
 			+'<img src="'+textwise_settings.pluginDir+'/img/head_powered_by_textwise.gif" alt="powered by TextWise" /></em> '
 			+helpImage('textwise_cat_help')+'</p>'
 			+'<ul id="textwise_cats"> </ul></div>'
@@ -491,6 +502,8 @@ function textwise_contentUpdateCallback(response) {
 			}
 		}
 		textwise_settings.lastUpdateStatus = 'ok';
+	} else if (response == '') {
+		//Do nothing. They are probably leaving the page.
 	} else {
 		//Some problem with processing response..
 		alert('Response error: '+response);
@@ -636,9 +649,9 @@ function textwise_tag_toggle() {
 		tw_taglist = tw_taglist.replace( /\s+,+\s*/g, ',' ).replace( /,+/g, ',' ).replace( /,+\s+,+/g, ',' ).replace( /,+\s*$/g, '' ).replace( /^\s*,+/g, '' );
 		jQuery('#textwise_tag_input').val(tw_taglist);
 		tag_update_quickclicks();	//From WP codebase
-		textwise_wptag_rebind();
 		jQuery(this).addClass('selected');
 	}
+	textwise_wptag_rebind();
 }
 
 function textwise_tag_hover(e) {
@@ -759,10 +772,21 @@ function textwise_cat_toggle() {
 			wpcatinput.attr('checked', true);
 		} else {
 			//Add it
-			jQuery('#newcat').focus();
-			jQuery('#newcat').val(catinput);
-			jQuery('#category-add-sumbit').click();	//May stop working if they fix the typo..
-			jQuery('#newcat').blur();
+
+			//WP 2.9.2 and earlier
+			var newcatfield = '#newcat';
+			var newcatbutton = '#category-add-sumbit';
+
+			//WP 3.0
+			if ( !jQuery(newcatfield).length ) {
+				newcatfield = '#newcategory';
+				newcatbutton = '#category-add-submit';
+			}
+			jQuery(newcatfield).focus();
+			jQuery(newcatfield).val(catinput);
+			jQuery(newcatbutton).click();
+			jQuery(newcatfield).blur();
+
 			function newcat_click() {
 				var wpnewcat = textwise_wpcat_find(catinput);
 				if (wpnewcat) {
@@ -884,7 +908,10 @@ function textwise_image_toggle(e) {
 			tinyMCE.activeEditor.focus(false);
 			var el = tinyMCE.activeEditor.selection.getNode();
 			var el2 = textwise_tinymce_special_node(el);
-			el = (el == el2) ? el : jQuery(el2).parent();
+			//If selected node is a special node, insert in it, otherwise insert outside of it
+//			el = (el == el2) ? el : jQuery(el2).parent();
+			el = !el2 ? el : jQuery(el2).parent();
+//			if (el2) { el = jQuery(el2).parent(); }
 			if (jQuery(el).is('a')) { el = jQuery(el).parent(); }
 			jQuery(el).prepend(htmlTag);
 
@@ -982,12 +1009,10 @@ function textwise_sync_video_list() {
 	var tableVid = jQuery('#textwise_video_table tr');
 	tableVid.empty();
 
-	//var rich = (typeof tinyMCE != "undefined") && tinyMCE.activeEditor && !tinyMCE.activeEditor.isHidden();
 	var rich = (textwise_getEditor() == 'tinymce');
 	var videolist = [];
 	if ( rich ) {
 		var ed = tinyMCE.activeEditor;
-		//textwise_getContent();
 		//TinyMCE encloses the video in an image tag
 		var editor_videos = jQuery(ed.getBody()).find('span.tw_selvid img.mceItemFlash');
 		jQuery.each(editor_videos, function(i, objVid){
@@ -1044,7 +1069,9 @@ function textwise_video_toggle(e) {
 		var tagTitle = jQuery(obj).attr('title');
 		var tagObj = {};
 		if (tagTitle && tagTitle != 'undefined') {
-			var tagObj = eval('({'+tagTitle+'})');
+			try {	//If an image wanders into a span for TW videos, the title attrib won't evaluate as JSON properly
+				tagObj = eval('({'+tagTitle+'})');
+			} catch(err) { }
 			if (tagObj.src == videoObj.enclosureUrl) {
 				editor_videos.push(obj);
 			}
@@ -1079,7 +1106,8 @@ function textwise_video_toggle(e) {
 			tinyMCE.activeEditor.focus(false);
 			var el = tinyMCE.activeEditor.selection.getNode();
 			var el2 = textwise_tinymce_special_node(el);
-			el = (el == el2) ? el : jQuery(el2).parent();
+			el = !el2 ? el : jQuery(el2).parent();
+//			el = (el == el2) ? el : jQuery(el2).parent();
 			if (jQuery(el).is('a')) { el = jQuery(el).parent(); }
 			jQuery(el).prepend(htmlTag);
 
@@ -1254,6 +1282,8 @@ function textwise_wiki_toggle(e) {
 /** Misc Helpers **/
 
 function textwise_tinymce_special_node(node) {
+	//Find nearest parent node patching selector
+	//From jQuery code for use with older versions
 	var getClosest = function(selector, cur){
 		while (cur && cur.ownerDocument) {
 			if (jQuery(cur).is(selector)) {
@@ -1266,9 +1296,13 @@ function textwise_tinymce_special_node(node) {
 
 	var p;
 
+	//If inside of a special container, work with that container instead of the selected node
+	// Images
 	if (p = getClosest('div.mceTemp', node)) { return p; }
+	// YouTube videos
 	if (p = getClosest('span.tw_selvid', node)) { return p; }
-	return node;
+	//return node;
+	return false;
 }
 
 function textwise_get_preview() {
