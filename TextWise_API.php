@@ -62,10 +62,10 @@ class TextWise_API
         $url .= $service;
 
 
-        if ( ($service == 'filter' || $service == 'concept') && isset($parameters['content']) ) {
-        	$badchars = array('"', "'");
-        	$parameters['content'] = str_replace($badchars, ' ', $parameters['content']);
-        }
+//        if ( ($service == 'filter' || $service == 'concept') && isset($parameters['content']) ) {
+//        	$badchars = array('"', "'");
+//        	$parameters['content'] = str_replace($badchars, ' ', $parameters['content']);
+//        }
 
 		//Append additional settings (Configuration/Index Id) depending on service
 		switch ($service) {
@@ -101,6 +101,7 @@ class TextWise_API
         		$badchars = array("\n", "\r");
         		$response = str_replace($badchars, ' ', $response);
         		$returnValue = $this->parse_response_xml($response);
+        		$returnValue = $this->parse_response_array($returnValue);
         		break;
         	default:
         		$returnValue = $response;
@@ -108,435 +109,136 @@ class TextWise_API
         return $returnValue;
     }
 
+	function parse_response_array($arr) {
+		$about = array();
+
+		//About section
+		if ( isset($arr['response'][0]['about'][0]) ) {
+			foreach ($arr['response'][0]['about'][0] as $key => $val) {
+				$about[$key] = $val[0]['value'];
+			}
+			$result['about'] = $about;
+		}
+
+		if ( isset($arr['response'][0]['message'][0]) ) {
+			foreach ($arr['response'][0]['message'][0] as $key => $val) {
+				$message[$key] = $val;
+			}
+
+			$result['message'] = $message;
+		}
+
+		switch ($about['systemType']) {
+			case 'signature':
+				$dimensions = array();
+				if ( isset($arr['response'][0]['siggen'][0]['siggenResponse'][0]['signature'][0]['dimension']) ) {
+			    	foreach ($arr['response'][0]['siggen'][0]['siggenResponse'][0]['signature'][0]['dimension'] as $key => $val) {
+			    		$dimensions[$key]['weight']				= $val['weight'];
+			    		$dimensions[$key]['index']				= $val['index'];
+			    		$dimensions[$key]['label']				= $val['label'];
+		    		}
+				}
+	    		$result['dimensions'] = $dimensions;
+				break;
+			case 'concept':
+				$concepts = array();
+				if ( isset($arr['response'][0]['conceptExtractor'][0]['conceptExtractorResponse'][0]['concepts'][0]['concept']) ) {
+			    	foreach ($arr['response'][0]['conceptExtractor'][0]['conceptExtractorResponse'][0]['concepts'][0]['concept'] as $key => $val) {
+			    		$concepts[$key]['weight']				= $val['weight'];
+			    		$concepts[$key]['label']				= $val['label'];
+			    		if ( isset($val['position']) ) {
+				    		$concepts[$key]['positions']		= $val['position'];
+			    		}
+		    		}
+				}
+				$result['concepts'] = $concepts;
+				break;
+			case 'category':
+				$categories = array();
+				if ( isset($arr['response'][0]['categorizer'][0]['categorizerResponse'][0]['categories'][0]['category']) ) {
+			    	foreach ($arr['response'][0]['categorizer'][0]['categorizerResponse'][0]['categories'][0]['category'] as $key => $val) {
+			    		$categories[$key]['id']					= $val['id'];
+			    		$categories[$key]['weight']				= $val['weight'];
+			    		$categories[$key]['label']				= $val['label'];
+		    		}
+				}
+				$result['categories'] = $categories;
+				break;
+			case 'match':
+				$matches = array();
+				if ( isset($arr['response'][0]['contentMatch'][0]['contentMatchResponse'][0]['matches'][0]['match']) ) {
+			    	foreach ($arr['response'][0]['contentMatch'][0]['contentMatchResponse'][0]['matches'][0]['match'] as $key => $val) {
+			    		$matches[$key]['id']				= $val['id'];
+			    		$matches[$key]['score']				= $val['score'];
+						if ( isset($val['attribute']) ) {
+				    		foreach ($val['attribute'] as $k => $v) {
+					    		$matches[$key][$v['name']]	= $v['value'];
+				    		}
+						}
+		    		}
+				}
+	    		$result['matches'] = $matches;
+	    		break;
+			case 'filter':
+				$result['filteredTextLength'] = $arr['response'][0]['filter'][0]['filterResponse'][0]['filteredTextLength'][0]['value'];
+				$result['filteredText'] = $arr['response'][0]['filter'][0]['filterResponse'][0]['filteredText'][0]['value'];
+				break;
+		}
+
+		return $result;
+	}
+
 	//Parse the XML data
-    function parse_response_xml($xmldata) {
-        $p = xml_parser_create();
-        xml_parser_set_option($p, XML_OPTION_CASE_FOLDING, 0);
-        xml_parser_set_option($p, XML_OPTION_SKIP_WHITE, 1);
-        xml_parse_into_struct($p, $xmldata, $parsed);
-        xml_parser_free($p);
-        $n = count($parsed);
-        $i = 0;
+	function parse_response_xml($xmldata) {
+		$p = xml_parser_create();
+		xml_parser_set_option($p, XML_OPTION_CASE_FOLDING, 0);
+		xml_parser_set_option($p, XML_OPTION_SKIP_WHITE, 0);
+		xml_parse_into_struct($p, $xmldata, $parsed);
+		xml_parser_free($p);
 
-        while ($i < $n)
-        {
-            $e0 = $parsed[$i];
 
-            if (($e0['tag'] == 'response') && ($e0['level'] == 1))
-            {
-                // ignore
-            }
-            else if (($e0['tag'] == 'message') && ($e0['level'] == 2))
-            {
-                $returnValue['message'] = $e0['attributes'];
-                return $returnValue;
-            }
-            else if (($e0['tag'] == 'about') && ($e0['level'] == 2) && ($e0['type'] == 'open'))
-            {
-                $aboutArray = array();
-                ++$i;
+		$result = array();
+		$current = &$result;
+		$lasttag = &$result;
+		foreach ($parsed as $e) {
+			switch ($e['type']) {
+				case 'open':
+					$lasttag = &$current;
+					$current = &$current[$e['tag']][];
+					$current['_parent'] = &$lasttag;
 
-                while ($i < $n)
-                {
-                    $e1 = $parsed[$i];
+					$current = array_merge($current, $this->process_values($e));
+					break;
+				case 'complete':
+					$current[$e['tag']][] = $this->process_values($e);;
+					break;
 
-                    if (($e1['tag'] == 'about') && ($e1['level'] == 2) && ($e1['type'] == 'close'))
-                    {
-                        $returnValue['about'] = $aboutArray;
-                        break;
-                    }
-                    else
-                    {
-                        $aboutArray[$e1['tag']] = $e1['value'];
-                    }
+				case 'close':
+					$parent = &$current['_parent'];
+					unset($current['_parent']);
+					$current = &$parent;
+					break;
+				case 'cdata':
+					if (trim($e['value']) != '') {
+						$current['cdata'] = $e['value'];
+					}
+					break;
+			}
+		}
 
-                    ++$i;
-                }
-            }
-            else if (($e0['tag'] == 'siggen') && ($e0['level'] == 2) && ($e0['type'] == 'open'))
-            {
-                ++$i;
+		return $result;
+	}
 
-                while ($i < $n)
-                {
-                    $e1 = $parsed[$i];
-
-                    if (($e1['tag'] == 'siggen') && ($e1['level'] == 2) && ($e1['type'] == 'close'))
-                    {
-                        break;
-                    }
-                    else if (($e1['tag'] == 'siggenResponse') && ($e1['level'] == 3) && ($e1['type'] == 'open'))
-                    {
-                        ++$i;
-
-                        while ($i < $n)
-                        {
-                            $e2 = $parsed[$i];
-
-                            if (($e2['tag'] == 'siggenResponse') && ($e2['level'] == 3) && ($e2['type'] == 'close'))
-                            {
-                                break;
-                            }
-                            else if (($e2['tag'] == 'signature') && ($e2['level'] == 4) && ($e2['type'] == 'open'))
-                            {
-                                $dimensionArray = array();
-                                ++$i;
-
-                                while ($i < $n)
-                                {
-                                    $e3 = $parsed[$i];
-
-                                    if (($e3['tag'] == 'signature') && ($e3['level'] == 4) && ($e3['type'] == 'close'))
-                                    {
-                                        break;
-                                    }
-                                    else if (($e3['tag'] == 'dimension') && ($e3['level'] == 5) && ($e3['type'] == 'complete'))
-                                    {
-                                        $dimensionArray[] = $e3['attributes'];
-                                    }
-                                    else
-                                    {
-                                        $this->xml_parse_error($parsed[$i]);
-                                    }
-
-                                    ++$i;
-                                }
-
-                                $returnValue['dimensions'] = $dimensionArray;
-                            }
-                            else
-                            {
-                                $this->xml_parse_error($parsed[$i]);
-                            }
-
-                            ++$i;
-                        }
-                    }
-                    else
-                    {
-                        $this->xml_parse_error($parsed[$i]);
-                    }
-
-                    ++$i;
-                }
-            }
-            else if (($e0['tag'] == 'conceptExtractor') && ($e0['level'] == 2) && ($e0['type'] == 'open'))
-            {
-                ++$i;
-
-                while ($i < $n)
-                {
-                    $e1 = $parsed[$i];
-
-                    if (($e1['tag'] == 'conceptExtractor') && ($e1['level'] == 2) && ($e1['type'] == 'close'))
-                    {
-                        break;
-                    }
-                    else if (($e1['tag'] == 'conceptExtractorResponse') && ($e1['level'] == 3) && ($e1['type'] == 'open'))
-                    {
-                        ++$i;
-
-                        while ($i < $n)
-                        {
-                            $e2 = $parsed[$i];
-
-                            if (($e2['tag'] == 'conceptExtractorResponse') && ($e2['level'] == 3) && ($e2['type'] == 'close'))
-                            {
-                                break;
-                            }
-                            else if (($e2['tag'] == 'concepts') && ($e2['level'] == 4) && ($e2['type'] == 'open'))
-                            {
-                                $conceptArray = array();
-                                ++$i;
-
-                                while ($i < $n)
-                                {
-                                    $e3 = $parsed[$i];
-
-                                    if (($e3['tag'] == 'concepts') && ($e3['level'] == 4) && ($e3['type'] == 'close'))
-                                    {
-                                        break;
-                                    }
-                                    else if (($e3['tag'] == 'concept') && ($e3['level'] == 5) && ($e3['type'] == 'complete'))
-                                    {
-                                        $conceptArray[] = $e3['attributes'];
-                                    }
-                                    //Additions by Jeff Brand to accomodate 'includePositions' option
-                                    else if (($e3['tag'] == 'concept') && ($e3['level'] == 5) && ($e3['type'] == 'open'))
-                                    {
-                                        $conceptArray[] = $e3['attributes'];
-                                    	$positionArray = array();
-                                    	++$i;
-                                    	while ($i < $n)
-                                    	{
-                                    		$e4 = $parsed[$i];
-                                    		if (($e4['tag'] == 'concept') && ($e4['level'] == 5) && ($e4['type'] == 'close'))
-                                    		{
-                                    			break;
-                                    		}
-                                    		else if (($e4['tag'] == 'position') && ($e4['level'] == 6) && ($e4['type'] == 'complete'))
-                                    		{
-                                    			$conceptArray[count($conceptArray)-1]['positions'][] = $e4['attributes'];
-                                    		}
-                                    		else
-                                    		{
-                                    			$this->xml_parse_error($parsed[$i]);
-                                    		}
-
-                                    		++$i;
-                                    	}
-                                    }
-                                    //End of Jeff's additions
-                                    else
-                                    {
-                                        $this->xml_parse_error($parsed[$i]);
-                                    }
-
-                                    ++$i;
-                                }
-
-                                $returnValue['concepts'] = $conceptArray;
-                            }
-                            else if (($e2['tag'] == 'concepts') && ($e2['level'] == 4) && ($e2['type'] == 'complete'))
-                            {
-								$returnValue['concepts'] = array();
-                            }
-                            else
-                            {
-                                $this->xml_parse_error($parsed[$i]);
-                            }
-
-                            ++$i;
-                        }
-                    }
-                    else
-                    {
-                        $this->xml_parse_error($parsed[$i]);
-                    }
-
-                    ++$i;
-                }
-            }
-            else if (($e0['tag'] == 'categorizer') && ($e0['level'] == 2) && ($e0['type'] == 'open'))
-            {
-                ++$i;
-
-                while ($i < $n)
-                {
-                    $e1 = $parsed[$i];
-
-                    if (($e1['tag'] == 'categorizer') && ($e1['level'] == 2) && ($e1['type'] == 'close'))
-                    {
-                        break;
-                    }
-                    else if (($e1['tag'] == 'categorizerResponse') && ($e1['level'] == 3) && ($e1['type'] == 'open'))
-                    {
-                        ++$i;
-
-                        while ($i < $n)
-                        {
-                            $e2 = $parsed[$i];
-
-                            if (($e2['tag'] == 'categorizerResponse') && ($e2['level'] == 3) && ($e2['type'] == 'close'))
-                            {
-                                break;
-                            }
-                            else if (($e2['tag'] == 'categories') && ($e2['level'] == 4) && ($e2['type'] == 'open'))
-                            {
-                                $categoryArray = array();
-                                ++$i;
-
-                                while ($i < $n)
-                                {
-                                    $e3 = $parsed[$i];
-
-                                    if (($e3['tag'] == 'categories') && ($e3['level'] == 4) && ($e3['type'] == 'close'))
-                                    {
-                                        break;
-                                    }
-                                    else if (($e3['tag'] == 'category') && ($e3['level'] == 5) && ($e3['type'] == 'complete'))
-                                    {
-                                        $categoryArray[] = $e3['attributes'];
-                                    }
-                                    else
-                                    {
-                                        $this->xml_parse_error($parsed[$i]);
-                                    }
-
-                                    ++$i;
-                                }
-
-                                $returnValue['categories'] = $categoryArray;
-                            }
-                            else if (($e2['tag'] == 'categories') && ($e2['level'] == 4) && ($e2['type'] == 'complete'))
-							{
-								$returnValue['categories'] = array();
-							}
-                            else
-                            {
-                                $this->xml_parse_error($parsed[$i]);
-                            }
-
-                            ++$i;
-                        }
-                    }
-                    else
-                    {
-                        $this->xml_parse_error($parsed[$i]);
-                    }
-
-                    ++$i;
-                }
-            }
-            else if (($e0['tag'] == 'contentMatch') && ($e0['level'] == 2) && ($e0['type'] == 'open'))
-            {
-                ++$i;
-
-                while ($i < $n)
-                {
-                    $e1 = $parsed[$i];
-
-                    if (($e1['tag'] == 'contentMatch') && ($e1['level'] == 2) && ($e1['type'] == 'close'))
-                    {
-                        break;
-                    }
-                    else if (($e1['tag'] == 'contentMatchResponse') && ($e1['level'] == 3) && ($e1['type'] == 'open'))
-                    {
-                        ++$i;
-
-                        while ($i < $n)
-                        {
-                            $e2 = $parsed[$i];
-
-                            if (($e2['tag'] == 'contentMatchResponse') && ($e2['level'] == 3) && ($e2['type'] == 'close'))
-                            {
-                                break;
-                            }
-                            else if (($e2['tag'] == 'matches') && ($e2['level'] == 4) && ($e2['type'] == 'open'))
-                            {
-                                $matchesArray = array();
-                                ++$i;
-
-                                while ($i < $n)
-                                {
-                                    $e3 = $parsed[$i];
-
-                                    if (($e3['tag'] == 'matches') && ($e3['level'] == 4) && ($e3['type'] == 'close'))
-                                    {
-                                        break;
-                                    }
-                                    else if (($e3['tag'] == 'match') && ($e3['level'] == 5) && ($e3['type'] == 'open'))
-                                    {
-                                        $matchArray = $e3['attributes'];
-                                        ++$i;
-
-                                        while ($i < $n)
-                                        {
-                                            $e4 = $parsed[$i];
-
-                                            if (($e4['tag'] == 'match') && ($e4['level'] == 5) && ($e4['type'] == 'close'))
-                                            {
-                                                break;
-                                            }
-                                            else if (($e4['tag'] == 'attribute') && ($e4['level'] == 6) && ($e4['type'] == 'complete'))
-                                            {
-                                                $attributeName = $e4['attributes']['name'];
-                                                $matchArray[$attributeName] = $e4['value'];
-                                            }
-
-                                            ++$i;
-                                        }
-
-                                        $matchesArray[] = $matchArray;
-                                    }
-                                    else
-                                    {
-                                        $this->xml_parse_error($parsed[$i]);
-                                    }
-
-                                    ++$i;
-                                }
-
-                                $returnValue['matches'] = $matchesArray;
-                            }
-                            else if (($e2['tag'] == 'matches') && ($e2['level'] == 4) && ($e2['type'] == 'complete'))
-                            {	//Handle empty result set
-                        		$returnValue['matches'] = array();
-                            }
-                            else
-                            {
-                                $this->xml_parse_error($parsed[$i]);
-                            }
-
-                            ++$i;
-                        }
-                    }
-                    else
-                    {
-                        $this->xml_parse_error($parsed[$i]);
-                    }
-
-                    ++$i;
-                }
-            }
-            else if (($e0['tag'] == 'filter') && ($e0['level'] == 2) && ($e0['type'] == 'open'))
-            {
-                ++$i;
-
-                while ($i < $n)
-                {
-                    $e1 = $parsed[$i];
-
-                    if (($e1['tag'] == 'filter') && ($e1['level'] == 2) && ($e1['type'] == 'close'))
-                    {
-                        break;
-                    }
-                    else if (($e1['tag'] == 'filterResponse') && ($e1['level'] == 3) && ($e1['type'] == 'open'))
-                    {
-                        ++$i;
-
-                        while ($i < $n)
-                        {
-                            $e2 = $parsed[$i];
-
-                            if (($e2['tag'] == 'filterResponse') && ($e2['level'] == 3) && ($e2['type'] == 'close'))
-                            {
-                                break;
-                            }
-                            else if (($e2['tag'] == 'filteredTextLength') && ($e2['level'] == 4) && ($e2['type'] == 'complete'))
-                            {
-                                $returnValue['filteredTextLength'] = $e2['value'];
-                            }
-                            else if (($e2['tag'] == 'filteredText') && ($e2['level'] == 4) && ($e2['type'] == 'complete'))
-                            {
-                                $returnValue['filteredText'] = $e2['value'];
-                            }
-                            else
-                            {
-                                $this->xml_parse_error($parsed[$i]);
-                            }
-
-                            ++$i;
-                        }
-                    }
-                    else
-                    {
-                        $this->xml_parse_error($parsed[$i]);
-                    }
-
-                    ++$i;
-                }
-            }
-            else
-            {
-                $this->xml_parse_error($parsed[$i]);
-            }
-
-            ++$i;
-        }
-
-        return $returnValue;
-    }
+	function process_values($e) {
+		$data = array();
+		if ( isset($e['attributes']) ) {
+			foreach ($e['attributes'] as $key => $val) {
+				$data[$key] = $val;
+			}
+		}
+		if ( trim($e['value']) != '' ) { $data['value'] = $e['value']; }
+		return $data;
+	}
 
 	function xml_parse_error($xmlNode) {
 		die("bad xml: " . $xmlNode['tag'] . ", level = " . $xmlNode['level']);
@@ -554,13 +256,14 @@ class TextWise_API
         $params = array('http' => array('method' => 'POST', 'content' => $data));
 		$params['http']['header'] = "Content-type: application/x-www-form-urlencoded\r\n";
 		$params['http']['header'] .= "Content-length: ".strlen($data)."\r\n";
+		$params['http']['header'] .= "User-Agent: PHP/TextWise API\r\n";
         if ($optional_headers !== null)
         {
             $params['http']['header'] .= $optional_headers;
         }
 
         $ctx = stream_context_create($params);
-        $fp = @fopen($url, 'rb', false, $ctx) or die('Error accessing TextWise API');
+        $fp = @fopen($url, 'rb', false, $ctx) or die('Your web server cannot connect to the TextWise API');
 
  		while (!feof($fp)) {
 			$response .= fread($fp, 8192);
@@ -569,7 +272,7 @@ class TextWise_API
 
         if ($response === false)
         {
-            die("Problem reading data from $url, $php_errormsg");
+            die("Your web server cannot read data from $url, $php_errormsg");
         }
 
 		fclose($fp);
