@@ -341,11 +341,18 @@ function textwise_contentUpdate() {
 
 function textwise_contentUpdateCallback(response) {
 	var res = wpAjax.parseAjaxResponse(response);
+//	console.log(res);
 	var results = {};
 	if ( res && res.responses && res.responses.length ) {
 		for (i=0; i<res.responses.length; i++) {
 			var resi = res.responses[i];
 			results[resi.what] = eval("Array("+resi.data+")"); //Convert JSON Response into Array
+			if (res.responses[i].supplemental.error) {
+				alert('Response error: '+res.responses[i].supplemental.error);
+				textwise_settings.lastUpdateStatus = 'error';
+				textwise_updateStatus('off');
+				return;
+			}
 		}
 
 		for (i in results) {

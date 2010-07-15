@@ -3,7 +3,7 @@ Contributors: textwise
 Tags: semantic, admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, articles
 Requires at least: 2.8.6
 Tested up to: 3.0.0
-Stable tag: 1.1.1
+Stable tag: 1.1.3
 
 Use the power of TextWise Similarity Search technology to find related images, videos, and other content to your blog post as you edit.
 
@@ -100,6 +100,9 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Changelog ==
 
+= 1.1.3 - July 2010 =
+* Add warning/better handling for servers with `allow_url_fopen = Off`
+
 = 1.1.1 - July 2010 =
 * Support for WordPress 3.0 - Single and Multi-Site
 * No longer testing with verions earlier than WordPress 2.8.6. A warning interface will be displayed to those users of the plugin
@@ -111,12 +114,14 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Upgrade Notice ==
 
+= 1.1.3 =
+Better handling for restricted PHP configurations
+
 = 1.1.1 =
 WordPress 3.0 compatibility release
 
 = 1.0.4 =
 Fixes Tag and Category suggestions under Wordpress 2.9
-
 
 
 == Screenshots ==
