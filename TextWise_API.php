@@ -16,10 +16,13 @@ class TextWise_API
     function TextWise_API($parameters)
     {
     	//Check for required configuration parameters
-        isset($parameters['baseUrl']) or die("required parameter 'baseUrl' is not defined");
+        if ( !isset($parameters['baseUrl']) ) {
+        	return array('error' => "required parameter 'baseUrl' is not defined");
+        }
         $this->_baseUrl = $parameters['baseUrl'];
-
-		isset($parameters['token']) or die("required parameter 'token' is not defined");
+		if ( !isset($parameters['token']) ) {
+			return array('error' => "required parameter 'token' is not defined");
+		}
         $this->_token = $parameters['token'];
     }
 
@@ -85,29 +88,31 @@ class TextWise_API
 				}
 			break;
 			default:
-				die("unknown service");
+				return array('error' =>"unknown service");
 		}
 
-        $url .= isset($configId) ? '/' . $configId : '';
-        $response = $this->do_post_request($url, $this->build_query($parameters));
+		$url .= isset($configId) ? '/' . $configId : '';
+		$response = $this->do_post_request($url, $this->build_query($parameters));
 
-        if (strlen($response) == 0) {
-        	die("server did not return a response");
-        }
+		if (strlen($response) == 0) {
+			return array('error' => "API did not return a response");
+		} else if ( is_array($response) ) {
+			return $response;
+		}
 
-        switch ($parameters['format']) {
-        	case 'xml':
-        	case '':
-        		$badchars = array("\n", "\r");
-        		$response = str_replace($badchars, ' ', $response);
-        		$returnValue = $this->parse_response_xml($response);
-        		$returnValue = $this->parse_response_array($returnValue);
-        		break;
-        	default:
-        		$returnValue = $response;
-        }
-        return $returnValue;
-    }
+		switch ($parameters['format']) {
+			case 'xml':
+			case '':
+				$badchars = array("\n", "\r");
+				$response = str_replace($badchars, ' ', $response);
+				$returnValue = $this->parse_response_xml($response);
+				$returnValue = $this->parse_response_array($returnValue);
+				break;
+			default:
+				$returnValue = $response;
+		}
+		return $returnValue;
+	}
 
 	function parse_response_array($arr) {
 		$about = array();
@@ -240,9 +245,9 @@ class TextWise_API
 		return $data;
 	}
 
-	function xml_parse_error($xmlNode) {
-		die("bad xml: " . $xmlNode['tag'] . ", level = " . $xmlNode['level']);
-	}
+//	function xml_parse_error($xmlNode) {
+//		die("bad xml: " . $xmlNode['tag'] . ", level = " . $xmlNode['level']);
+//	}
 
 	function build_query($parameters) {
 		foreach ($parameters as $key => $val) {
@@ -263,16 +268,21 @@ class TextWise_API
         }
 
         $ctx = stream_context_create($params);
-        $fp = @fopen($url, 'rb', false, $ctx) or die('Your web server cannot connect to the TextWise API');
+        $fp = @fopen($url, 'rb', false, $ctx);
+        if ($fp) {
+        	stream_set_timeout($fp, 30);
+        } else {
+        	return array('error' => 'Your web server cannot connect to the TextWise API');
+        }
 
+		$response = '';
  		while (!feof($fp)) {
 			$response .= fread($fp, 8192);
 		}
 
-
         if ($response === false)
         {
-            die("Your web server cannot read data from $url, $php_errormsg");
+            return array('error' => "Your web server cannot read data from $url, $php_errormsg");
         }
 
 		fclose($fp);
