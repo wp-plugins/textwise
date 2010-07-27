@@ -3,7 +3,7 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://textwise.com/tools/wordpress-plugin-0
 Description: SemanticHacker API integration for WordPress
-Version: 1.1.3
+Version: 1.1.4
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
@@ -216,13 +216,13 @@ function textwise_check_versions() {
 //Make sure PHP requirements available
 function textwise_check_dependencies() {
 	$fopen = ini_get('allow_url_fopen');
-	// curl support?
-	return $fopen;
+	$curl = function_exists('curl_init');
+	return ($fopen || $curl);
 }
 
 function textwise_dependency_warning() {
 	if ( !textwise_check_dependencies() ) {
-		echo '<div class="updated"><p><b>Textwise:</b> Your web server configuration prevents communication with the TextWise API.</p></div>';
+		echo '<div class="updated"><p><b>Textwise:</b> Your web server configuration prevents communication with the TextWise API. <a target="_blank" href="http://www.wordpress.org/extend/plugins/textwise/installation">Learn More</a></p></div>';
 	}
 }
 
@@ -510,16 +510,13 @@ function textwise_ajax_content_update() {
 		$result = $api->concept($api_req);
 	}
 
-	if ( isset($result['concepts']) ) {
+	if ( is_array($result['concepts']) ) {
 		$concept_results = $result['concepts'];
-		if ( isset($result['message']) ) {
-			$sup = array('error' => $result['message']['string']);
-		}
 	} else {
 		$concept_results = array();
-		if ( isset($result) ) {
-			$sup = $result;
-		}
+	}
+	if ( is_array($result['message']) ) {
+		$sup = array('error' => $result['message']['string']);
 	}
 
 	//Tags
@@ -538,7 +535,7 @@ function textwise_ajax_content_update() {
 			'what' => 'tags',
 			'id' => $id,
 			'data' => $id ? $data : '',
-			'supplemental' => isset($sup) ? $result : array()
+			'supplemental' => isset($sup) ? $sup : array()
 			));
 	}
 

@@ -2,6 +2,9 @@
 
 class TextWise_API
 {
+	//Set default whether to use fopen or curl for API call.
+	var $use_curl = false;
+
     // parameter names that will be passed for the various service Ids
     var $_signatureId = 'ConfigurationID';
     var $_conceptId = 'ConfigurationID';
@@ -15,6 +18,17 @@ class TextWise_API
 	//Class Constructor, PHP4 compatible format
     function TextWise_API($parameters)
     {
+		//Check for http call functionality
+
+		//Force CURL if config has "allow_url_fopen = Off"
+		if ( !ini_get('allow_url_fopen') ) {
+			$this->use_curl = true;
+		}
+
+		if ( $this->use_curl && !function_exists('curl_init') ) {
+			return array('error' => 'Server cannot support outgoing HTTP requests');
+		}
+
     	//Check for required configuration parameters
         if ( !isset($parameters['baseUrl']) ) {
         	return array('error' => "required parameter 'baseUrl' is not defined");
@@ -61,14 +75,9 @@ class TextWise_API
             $url .= '/';
         }
 
-        $url .= $this->_token . '/';
-        $url .= $service;
+        $url .= urlencode($this->_token) . '/';
+        $url .= urlencode($service);
 
-
-//        if ( ($service == 'filter' || $service == 'concept') && isset($parameters['content']) ) {
-//        	$badchars = array('"', "'");
-//        	$parameters['content'] = str_replace($badchars, ' ', $parameters['content']);
-//        }
 
 		//Append additional settings (Configuration/Index Id) depending on service
 		switch ($service) {
@@ -245,10 +254,6 @@ class TextWise_API
 		return $data;
 	}
 
-//	function xml_parse_error($xmlNode) {
-//		die("bad xml: " . $xmlNode['tag'] . ", level = " . $xmlNode['level']);
-//	}
-
 	function build_query($parameters) {
 		foreach ($parameters as $key => $val) {
 			$result[] = urlencode($key).'='.urlencode($val);
@@ -256,38 +261,73 @@ class TextWise_API
 		return implode('&', $result);
 	}
 
-    function do_post_request($url, $data, $optional_headers = null)
-    {
-        $params = array('http' => array('method' => 'POST', 'content' => $data));
-		$params['http']['header'] = "Content-type: application/x-www-form-urlencoded\r\n";
-		$params['http']['header'] .= "Content-length: ".strlen($data)."\r\n";
-		$params['http']['header'] .= "User-Agent: PHP/TextWise API\r\n";
-        if ($optional_headers !== null)
-        {
-            $params['http']['header'] .= $optional_headers;
-        }
+    function do_post_request($url, $data, $optional_headers = null) {
+		//$optional_header use format $optional_headers['Header'] = 'Value';
+		$headers['Content-type']		= 'application/x-www-form-urlencoded';
+		$headers['Content-Length']		= strlen($data);
+		$headers['User-Agent']			= 'User-Agent: PHP/TextWise API';
+		if ( $optional_headers != null ) {
+			$headers = array_merge($headers, $optional_headers);
+		}
 
-        $ctx = stream_context_create($params);
-        $fp = @fopen($url, 'rb', false, $ctx);
-        if ($fp) {
-        	stream_set_timeout($fp, 30);
-        } else {
-        	return array('error' => 'Your web server cannot connect to the TextWise API');
-        }
+		if ( $this->use_curl ) {
+			$result = $this->do_post_request_curl($url, $data, $headers);
+		} else {
+			$result = $this->do_post_request_fopen($url, $data, $headers);
+		}
+		return $result;
+    }
+
+    function do_post_request_fopen($url, $data, $headers) {
+		$params = array('http' => array('method' => 'POST', 'content' => $data, 'header' => ''));
+		foreach ($headers as $key => $value) {
+			$params['http']['header'] .= "{$key}: {$value}\r\n";
+		}
+
+		$ctx = stream_context_create($params);
+		$fp = @fopen($url, 'rb', false, $ctx);
+		if ($fp) {
+			stream_set_timeout($fp, 30);
+		} else {
+			return array('error' => 'Your web server cannot connect to the TextWise API');
+		}
 
 		$response = '';
- 		while (!feof($fp)) {
+			while (!feof($fp)) {
 			$response .= fread($fp, 8192);
 		}
 
-        if ($response === false)
-        {
-            return array('error' => "Your web server cannot read data from $url, $php_errormsg");
-        }
+		if ($response === false)
+		{
+		    return array('error' => "Your web server cannot read data from $url, $php_errormsg");
+		}
 
 		fclose($fp);
-        return $response;
-    }
+		return $response;
+	}
+
+	function do_post_request_curl($url, $data, $headers) {
+		$curl = curl_init($url);
+		curl_setopt($curl, CURLOPT_POST, true);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($curl, CURLOPT_FAILONERROR, true);
+		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+
+		$response = curl_exec($curl);
+
+		if ( curl_errno($curl) ) {
+			switch ( curl_errno($curl) ) {
+				case CURLE_COULDNT_CONNECT:			$error = 'Your web server cannot connect to the TextWise API (curl)'; break;
+				default:
+					$error = 'CURL error: '.curl_error($curl);
+			}
+			$response = array('error' => $error );
+		}
+		curl_close($curl);
+		return $response;
+	}
 
 
 }
