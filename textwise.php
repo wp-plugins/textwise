@@ -3,7 +3,7 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://textwise.com/tools/wordpress-plugin-0
 Description: SemanticHacker API integration for WordPress
-Version: 1.1.1
+Version: 1.1.4
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
@@ -37,6 +37,7 @@ add_action('admin_menu', 'textwise_admin_page');
 add_action('admin_notices', 'textwise_check_token');
 add_action('admin_notices', 'textwise_check_detectconflict');
 add_action('admin_notices', 'textwise_check_versions');
+add_action('admin_notices', 'textwise_dependency_warning');
 
 //Supported in 2.7+
 add_filter('plugin_action_links_textwise/textwise.php', 'textwise_plugin_links' );
@@ -45,7 +46,7 @@ add_filter('plugin_action_links_textwise/textwise.php', 'textwise_plugin_links' 
 add_action('admin_init', 'textwise_admin_init');
 
 //Load on editor pages only, if token exists and is valid, and any service is enabled.
-if ( get_option('textwise_api_token') && get_option('textwise_api_token_invalid') == 'n' &&
+if ( textwise_check_dependencies() && get_option('textwise_api_token') && get_option('textwise_api_token_invalid') == 'n' &&
 		( get_option('textwise_tag_enable') == '1' ||
 			get_option('textwise_contentlink_enable') == '1' ||
 			get_option('textwise_category_enable') == '1' ||
@@ -116,9 +117,6 @@ function textwise_admin_init() {
 		textwise_metabox_position($force);
 	}
 
-//	if ( get_option('textwise_api_token_invalid') == 'c' ) {
-//		textwise_verify_token();
-//	}
 }
 
 // Add a link to this plugin's settings page (2.7+)
@@ -139,6 +137,9 @@ function textwise_check_token() {
 		$message = 'API Token missing. Learn about this and other plugin options <a href="'.$infoUrl.'">here</a>.';
 	} elseif (get_option('textwise_api_token_invalid') === 'y') {
 		$message = 'API Token is invalid. Please correct it in the <a href="'.$infoUrl.'">settings</a>.';
+	} elseif (get_option('textwise_api_token_invalid') === 'c') {
+		// If it's still set to 'c', assume it's because of a connection error?
+		$message = 'API Token could not be verified due to connectivity issues.';
 	}
 
 	if ($message != '') {
@@ -151,20 +152,23 @@ if ($_POST['textwise_api_token'] && $_POST['textwise_api_token'] != get_option('
 }
 
 function textwise_verify_token() {
+	if ( !textwise_check_dependencies() ) { return; }
+
 	$token = get_option('textwise_api_token');
 	if ($token == '') {
 		update_option('textwise_api_token_invalid', 'y');
 	} else {
+		//Make request to TextWise API for Signature
 		$api = textwise_create_api();
 		$api_req['c'] = 'wp';
 		$api_req['content'] = '';
-
-		//Make request to TextWise API for Signature
-		$api = textwise_create_api();
 		$result = $api->signature($api_req);
 
-		if ($result['message']['code'] == '102') {
+		//Code 102: Invalid Token
+		if (is_array($result['message']) && $result['message']['code'] == '102') {
 			$invalid = 'y';
+		} else if ( is_array($result) && isset($result['error']) ) {
+			$invalid = 'c';
 		} else {
 			$invalid = 'n';
 		}
@@ -208,6 +212,20 @@ function textwise_check_versions() {
 
 	}
 }
+
+//Make sure PHP requirements available
+function textwise_check_dependencies() {
+	$fopen = ini_get('allow_url_fopen');
+	$curl = function_exists('curl_init');
+	return ($fopen || $curl);
+}
+
+function textwise_dependency_warning() {
+	if ( !textwise_check_dependencies() ) {
+		echo '<div class="updated"><p><b>Textwise:</b> Your web server configuration prevents communication with the TextWise API. <a target="_blank" href="http://www.wordpress.org/extend/plugins/textwise/installation">Learn More</a></p></div>';
+	}
+}
+
 
 //Add link to plugin settings page
 function textwise_admin_page() {
@@ -420,10 +438,12 @@ function textwise_ajax_nonce() {
 
 //Create a API proxy object configured with the proper URL and Token
 function textwise_create_api() {
-	include_once(ABSPATH . '/wp-content/plugins/textwise/TextWise_API.php');
-	$api_config['baseUrl'] = TEXTWISE_API_URL;
-	$api_config['token'] = get_option('textwise_api_token');
-	return new TextWise_API($api_config);
+	if ( textwise_check_dependencies() ) {
+		include_once(ABSPATH . '/wp-content/plugins/textwise/TextWise_API.php');
+		$api_config['baseUrl'] = TEXTWISE_API_URL;
+		$api_config['token'] = get_option('textwise_api_token');
+		return new TextWise_API($api_config);
+	}
 }
 
 //Check Signature of current editor text against last signature.
@@ -490,35 +510,42 @@ function textwise_ajax_content_update() {
 		$result = $api->concept($api_req);
 	}
 
+	if ( is_array($result['concepts']) ) {
+		$concept_results = $result['concepts'];
+	} else {
+		$concept_results = array();
+	}
+	if ( is_array($result['message']) ) {
+		$sup = array('error' => $result['message']['string']);
+	}
+
 	//Tags
-	if (get_option('textwise_tag_enable') == '1') {
+	if ( get_option('textwise_tag_enable') == '1') {
 		$arrConcepts = array();
 		$tagString = "{label: '%s', weight: %s}";
 		$tagWeight = '';
-		foreach ($result['concepts'] as $c) {
+		foreach ($concept_results as $c) {
 			if ($tagWeight == '') { $tagWeight = 1.0 / $c['weight']; }
 			$adjustedWeight = $tagWeight * $c['weight'];
 			$arrConcepts[] = sprintf($tagString, textwise_esc_json($c['label']), textwise_esc_json($adjustedWeight));
 		}
-		//$data = "'".implode("','", $arrConcepts)."'";
 		$data = implode(',', $arrConcepts);
 
 		$wpAjax->add(array(
 			'what' => 'tags',
 			'id' => $id,
 			'data' => $id ? $data : '',
-			'supplemental' => array()
+			'supplemental' => isset($sup) ? $sup : array()
 			));
 	}
 
 	//Content Links
 	//Reuse call to Tags but add surfaceForm data
-	if (get_option('textwise_contentlink_enable') == '1') {
+	if ( get_option('textwise_contentlink_enable') == '1') {
 		$filter = $api->filter($api_req);
 		$arrContentLinks = array();
 
-//		echo $filter['filteredText'];
-		foreach ($result['concepts'] as $c) {
+		foreach ($concept_results as $c) {
 			$arrContentLinks[] = textwise_esc_json(substr($filter['filteredText'], $c['positions'][0]['start'], $c['positions'][0]['end'] - $c['positions'][0]['start']+1));
 		}
 		$data = "'".implode("','", $arrContentLinks)."'";
@@ -527,7 +554,7 @@ function textwise_ajax_content_update() {
 			'what' => 'contentlinks',
 			'id' => $id,
 			'data' => $id ? $data : '',
-			'supplemental' => array()
+			'supplemental' => isset($result['error']) ? $result : array()
 			));
 
 	}
@@ -536,7 +563,7 @@ function textwise_ajax_content_update() {
 	if (get_option('textwise_category_enable') == '1') {
 		$result = $api->category($api_req);
 		$cat_results = null;
-		if(isset($result['categories']))
+		if ( isset($result['categories']) )
 			$cat_results = $result['categories'];
 		else
 			$cat_results = array();
@@ -550,7 +577,7 @@ function textwise_ajax_content_update() {
 			'what' => 'categories',
 			'id' => $id,
 			'data' => $id ? $data : '',
-			'supplemental' => array()
+			'supplemental' => isset($result['error']) ? $result : array()
 			));
 	}
 
@@ -560,11 +587,11 @@ function textwise_ajax_content_update() {
 		$api_req['fields'] = 'title,landingPageUrl,enclosureUrl,thumbnailUrl';
 		$result = $api->match($api_req);
 		$vidString = "{title: '%s', thumbnailUrl: '%s', enclosureUrl: '%s', landingPageUrl: '%s', videoId: '%s'}";
-		$vid_results = null;
-                if(isset($result['matches']))
-                        $vid_results = $result['matches'];
-                else
-                        $vid_results = array();
+		if( isset($result['matches']) ) {
+			$vid_results = $result['matches'];
+		} else {
+			$vid_results = array();
+		}
 		$arrVideos = array();
 		foreach ($vid_results as $m) {
 			if ($m['thumnailUrl'] != '') {
@@ -588,7 +615,7 @@ function textwise_ajax_content_update() {
 			'what' => 'videos',
 			'id' => $id,
 			'data' => $id ? $data : '',
-			'supplemental' => array()
+			'supplemental' => isset($result['error']) ? $result : array()
 			));
 	}
 
@@ -619,7 +646,7 @@ function textwise_ajax_content_update() {
 			'what' => 'images',
 			'id' => $id,
 			'data' => $id ? $data : '',
-			'supplemental' => array()
+			'supplemental' => isset($result['error']) ? $result : array()
 			));
 	}
 
@@ -651,7 +678,7 @@ function textwise_ajax_content_update() {
 			'what' => 'rss',
 			'id' => $id,
 			'data' => $id ? $data : '',
-			'supplemental' => array()
+			'supplemental' => isset($result['error']) ? $result : array()
 			));
 	}
 
@@ -682,7 +709,7 @@ function textwise_ajax_content_update() {
 			'what' => 'wiki',
 			'id' => $id,
 			'data' => $id ? $data : '',
-			'supplemental' => array()
+			'supplemental' => isset($result['error']) ? $result : array()
 			));
 	}
 
@@ -693,11 +720,11 @@ function textwise_ajax_content_update() {
 		$api_req['fields'] = 'title,description,landingPageUrl,imageUrl';
 		$result = $api->match($api_req);
 		$prod_results = null;
-		if(isset($result['matches']))
+		if ( isset($result['matches']) ) {
 			$prod_results = $result['matches'];
-		else
+		} else {
 			$prod_results = array();
-
+		}
 		$prodString = "{title:'%s', description:'%s', landingPageUrl:'%s', imageUrl:'%s'}";
 		$uniqueMatches = array();
 		$arrProducts = array();
@@ -724,7 +751,7 @@ function textwise_ajax_content_update() {
 			'what' => 'products',
 			'id' => $id,
 			'data' => $id ? $data : '',
-			'supplemental' => array()
+			'supplemental' => isset($result['error']) ? $result : array()
 			));
 	}
 

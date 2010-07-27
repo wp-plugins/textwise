@@ -90,7 +90,7 @@ function textwise_init() {
 	var titleBar;
 	var tagLine = ' <em>- powered by TextWise Similarity Search</em>';
 
-	if (textwise_dataobject.image_enable == 1 && (titleBar = jQuery('#textwise_metabox_contentlinks h3'))) {
+	if (textwise_dataobject.contentlink_enable == 1 && (titleBar = jQuery('#textwise_metabox_contentlinks h3'))) {
 		titleBar = (titleBar.find('span').length) ? titleBar.find('span') : titleBar;
 		titleBar.append(tagLine +' '+helpImage('textwise_contentlink_help'));
 	}
@@ -177,6 +177,7 @@ function textwise_init() {
 
 /** Content processing and AJAX calls **/
 
+//Why is this returning tinymce when it's not true??
 function textwise_getEditor() {
 	if (textwise_dataobject.wpVersion < '2.7') {
 		return wpTinyMCEConfig.defaultEditor;
@@ -341,11 +342,18 @@ function textwise_contentUpdate() {
 
 function textwise_contentUpdateCallback(response) {
 	var res = wpAjax.parseAjaxResponse(response);
+//	console.log(res);
 	var results = {};
 	if ( res && res.responses && res.responses.length ) {
 		for (i=0; i<res.responses.length; i++) {
 			var resi = res.responses[i];
 			results[resi.what] = eval("Array("+resi.data+")"); //Convert JSON Response into Array
+			if (res.responses[i].supplemental.error) {
+				alert('Response error: '+res.responses[i].supplemental.error);
+				textwise_settings.lastUpdateStatus = 'error';
+				textwise_updateStatus('off');
+				return;
+			}
 		}
 
 		for (i in results) {
