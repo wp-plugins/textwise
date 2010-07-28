@@ -3,7 +3,7 @@ Contributors: textwise
 Tags: semantic, admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, articles
 Requires at least: 2.8.6
 Tested up to: 3.0.0
-Stable tag: 1.1.1
+Stable tag: 1.1.5
 
 Use the power of TextWise Similarity Search technology to find related images, videos, and other content to your blog post as you edit.
 
@@ -45,8 +45,13 @@ Once the plugin is installed and activated, look for the TextWise section under 
 1. Download the plugin and extract the archive.
 1. Upload the `textwise` folder and its contents to `/wp-content/plugins/` of your blog.
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Register for an API Token at [SemanticHacker.com](http://semantichacker.com/api)
+1. Register for an API Token at [TextWise.com](http://textwise.com/api)
 1. Check out the `Settings` page in WordPress for plugin options.
+
+= Server Requirements =
+* PHP 4 or 5
+* PHP configuration should have `allow_url_fopen = On` or cURL support.
+
 
 == Frequently Asked Questions ==
 
@@ -62,7 +67,7 @@ Learn more about our Similarity Search technologies at [TextWise.com](http://www
 
 By using the freely available SemanticHacker API to access our Semantic Search technology, the content of a blog post is analyzed and matched with related content. Those suggestions are displayed as you edit your post.
 
-Learn more about our SemanticHacker API at [SemanticHacker.com](http://www.semantichacker.com/)
+Learn more about our SemanticHacker API at [TextWise.com](http://www.textwise.com/api)
 
 = How can I use images and video into my post? =
 
@@ -96,9 +101,15 @@ To further customize the stylesheet, you may modify the `textwise_post.css` file
 
 = Can the plugin be used along with other plugins? =
 
-While the plugin has been tested with different themes and plugins, we cannot guarantee that conflicts won't occur. We [encourage your feedback](http://www.semantichacker.com/forums/bugs) to help us improve the plugin.
+While the plugin has been tested with different themes and plugins, we cannot guarantee that conflicts won't occur. We [encourage your feedback](http://www.textwise.com/forums/bugs) to help us improve the plugin.
 
 == Changelog ==
+
+= 1.1.4 - July 2010 =
+* Added cURL fallback support for API requests
+
+= 1.1.3 - July 2010 =
+* Add warning/better handling for servers with `allow_url_fopen = Off`
 
 = 1.1.1 - July 2010 =
 * Support for WordPress 3.0 - Single and Multi-Site
@@ -111,6 +122,12 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Upgrade Notice ==
 
+= 1.1.4 =
+Added cURL fallback support for API requests
+
+= 1.1.3 =
+Better handling for restricted PHP configurations
+
 = 1.1.1 =
 WordPress 3.0 compatibility release
 
@@ -118,11 +135,9 @@ WordPress 3.0 compatibility release
 Fixes Tag and Category suggestions under Wordpress 2.9
 
 
-
 == Screenshots ==
 
 1. An example of the TextWise plugin publishing interface
-1. Video Suggestions
+1. Video and Image Suggestions
 1. Relevant Content Suggestions
-1. Product Suggestions
-1. Register for free SemanticHacker API
+1. Tag and Category Suggestions
