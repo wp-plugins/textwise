@@ -105,7 +105,7 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Changelog ==
 
-= 1.1.4 - July 2010 =
+= 1.1.5 - July 2010 =
 * Updated screenshots
 * Added cURL fallback support for API requests
 * Better error checking for invalid tokens
@@ -124,7 +124,7 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Upgrade Notice ==
 
-= 1.1.4 =
+= 1.1.5 =
 Added cURL fallback support for API requests, better error checking
 
 = 1.1.3 =
