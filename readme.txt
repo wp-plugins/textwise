@@ -106,7 +106,9 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 == Changelog ==
 
 = 1.1.4 - July 2010 =
+* Updated screenshots
 * Added cURL fallback support for API requests
+* Better error checking for invalid tokens
 
 = 1.1.3 - July 2010 =
 * Add warning/better handling for servers with `allow_url_fopen = Off`
@@ -123,7 +125,7 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 == Upgrade Notice ==
 
 = 1.1.4 =
-Added cURL fallback support for API requests
+Added cURL fallback support for API requests, better error checking
 
 = 1.1.3 =
 Better handling for restricted PHP configurations
