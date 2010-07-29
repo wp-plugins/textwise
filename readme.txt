@@ -3,7 +3,7 @@ Contributors: textwise
 Tags: semantic, admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, articles
 Requires at least: 2.8.6
 Tested up to: 3.0.0
-Stable tag: 1.1.3
+Stable tag: 1.1.5
 
 Use the power of TextWise Similarity Search technology to find related images, videos, and other content to your blog post as you edit.
 
@@ -106,7 +106,9 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 == Changelog ==
 
 = 1.1.4 - July 2010 =
+* Updated screenshots
 * Added cURL fallback support for API requests
+* Better error checking for invalid tokens
 
 = 1.1.3 - July 2010 =
 * Add warning/better handling for servers with `allow_url_fopen = Off`
@@ -123,7 +125,7 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 == Upgrade Notice ==
 
 = 1.1.4 =
-Added cURL fallback support for API requests
+Added cURL fallback support for API requests, better error checking
 
 = 1.1.3 =
 Better handling for restricted PHP configurations
@@ -138,7 +140,6 @@ Fixes Tag and Category suggestions under Wordpress 2.9
 == Screenshots ==
 
 1. An example of the TextWise plugin publishing interface
-1. Video Suggestions
+1. Video and Image Suggestions
 1. Relevant Content Suggestions
-1. Product Suggestions
-1. Register for free SemanticHacker API
+1. Tag and Category Suggestions
