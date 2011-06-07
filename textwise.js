@@ -196,7 +196,7 @@ function textwise_getContent() {
 	var post_title = jQuery('#title').val();
 	var post_content = '';
 
-	if ( rich ) {
+	if ( rich && tinyMCE.activeEditor ) {
 		var ed = tinyMCE.activeEditor;
 		if ( 'mce_fullscreen' == ed.id )
 			tinyMCE.get('content').setContent(ed.getContent({format : 'raw'}), {format : 'raw'});
@@ -221,7 +221,7 @@ function textwise_getContent() {
 function textwise_getIDom() {
 	var rich = (textwise_getEditor() == 'tinymce');
 	var i_dom;
-	if ( rich ) {
+	if ( rich && tinyMCE.activeEditor ) {
 		var ed = tinyMCE.activeEditor;
 		i_dom = jQuery(ed.getBody());
 	} else {
@@ -543,7 +543,7 @@ function textwise_updateStatus(status) {
 
 function textwise_sync_contentlink_list() {
 	var rich = (textwise_getEditor() == 'tinymce');
-	if ( rich ) {
+	if ( rich && tinyMCE.activeEditor ) {
 //		tinyMCE.activeEditor.getDoc().ignoreDOM = true;
 		var ed = tinyMCE.activeEditor;
 		i_dom = jQuery(ed.getBody());
@@ -610,7 +610,7 @@ function textwise_link_toggle() {
 		}
 	}
 
-	if ( rich ) { tinyMCE.activeEditor.getDoc().ignoreDOM = false; }
+	if ( rich && tinyMCE.activeEditor ) { tinyMCE.activeEditor.getDoc().ignoreDOM = false; }
 
 }
 
@@ -842,7 +842,7 @@ function textwise_sync_image_list() {
 	tableImg.empty();
 	var editor_images;
 	var rich = (textwise_getEditor() == 'tinymce');
-	if ( rich ) {
+	if ( rich && tinyMCE.activeEditor ) {
 		var ed = tinyMCE.activeEditor;
 		//textwise_getContent();
 		editor_images = jQuery(ed.getBody()).find('img.tw_selimg');
@@ -932,7 +932,7 @@ function textwise_image_toggle(e) {
 		jQuery(this).addClass('selected');
 	}
 
-	if (rich) {
+	if (rich && tinyMCE.activeEditor ) {
 		tinyMCE.activeEditor.getDoc().ignoreDOM = false;
 	}
 
@@ -1019,7 +1019,7 @@ function textwise_sync_video_list() {
 
 	var rich = (textwise_getEditor() == 'tinymce');
 	var videolist = [];
-	if ( rich ) {
+	if ( rich && tinyMCE.activeEditor ) {
 		var ed = tinyMCE.activeEditor;
 		//TinyMCE encloses the video in an image tag
 		var editor_videos = jQuery(ed.getBody()).find('span.tw_selvid img.mceItemFlash');
@@ -1062,7 +1062,7 @@ function textwise_video_toggle(e) {
 	var i_dom;
 
 	//Get the DOM from either editor
-	if ( rich ) {
+	if ( rich && tinyMCE.activeEditor ) {
 		tinyMCE.activeEditor.getDoc().ignoreDOM = true;
 		var ed = tinyMCE.activeEditor;
 		textwise_getContent();	//Refresh/re-render
@@ -1107,10 +1107,10 @@ function textwise_video_toggle(e) {
 		var vidSrc = videoObj.enclosureUrl;
 		var vidTitle = videoObj.title;
 		htmlTag = '<span class="tw_selvid"><img class="mceItemFlash" title="&quot;src&quot;:&quot;'+textwise_html_esc(vidSrc)
-			+'&quot;" src="../wp-includes/js/tinymce/plugins/media/img/trans.gif" '
-			+'mce_src="../wp-includes/js/tinymce/plugins/media/img/trans.gif" alt="" width="'+vidW
+			+'&quot;" src="../wp-content/plugins/textwise/tinymce/trans.gif" '
+			+'mce_src="../wp-content/plugins/textwise/tinymce/trans.gif" alt="" width="'+vidW
 			+'" height="'+vidH+'"></span>';
-		if ( rich ) {
+		if ( rich && tinyMCE.activeEditor ) {
 			tinyMCE.activeEditor.focus(false);
 			var el = tinyMCE.activeEditor.selection.getNode();
 			var el2 = textwise_tinymce_special_node(el);
@@ -1134,7 +1134,7 @@ function textwise_video_toggle(e) {
 		jQuery(this).addClass('selected');
 	}
 
-	if ( rich ) {
+	if ( rich && tinyMCE.activeEditor ) {
 		tinyMCE.activeEditor.getDoc().ignoreDOM = false;
 	}
 

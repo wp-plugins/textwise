@@ -263,8 +263,8 @@ class TextWise_API
 
     function do_post_request($url, $data, $optional_headers = null) {
 		//$optional_header use format $optional_headers['Header'] = 'Value';
-		$headers['Content-type']		= 'application/x-www-form-urlencoded';
-		$headers['Content-Length']		= strlen($data);
+		$headers['Content-type']		= 'Content-type: application/x-www-form-urlencoded';
+		$headers['Content-Length']		= 'Content-Length: '.strlen($data);
 		$headers['User-Agent']			= 'User-Agent: PHP/TextWise API';
 		if ( $optional_headers != null ) {
 			$headers = array_merge($headers, $optional_headers);
@@ -281,7 +281,7 @@ class TextWise_API
     function do_post_request_fopen($url, $data, $headers) {
 		$params = array('http' => array('method' => 'POST', 'content' => $data, 'header' => ''));
 		foreach ($headers as $key => $value) {
-			$params['http']['header'] .= "{$key}: {$value}\r\n";
+			$params['http']['header'] .= "{$value}\r\n";
 		}
 
 		$ctx = stream_context_create($params);
@@ -289,7 +289,7 @@ class TextWise_API
 		if ($fp) {
 			stream_set_timeout($fp, 30);
 		} else {
-			return array('error' => 'Your web server cannot connect to the TextWise API');
+			return array('error' => 'Your web server cannot connect to the TextWise API'.print_r($params, true));
 		}
 
 		$response = '';

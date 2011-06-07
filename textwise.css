@@ -6,21 +6,21 @@
 #textwise_contentlinks li { margin: 5px; padding: 0px; display: inline; float: left; }
 #textwise_contentlinks a { color: #696969; padding: 0px 1em; cursor: pointer; }
 #textwise_contentlinks a:hover { color: #000000; }
-#textwise_contentlinks a.selected { background: #fc2fa6; -moz-border-radius: .5em; color: #ffffff; }
+#textwise_contentlinks a.selected { background: #fc2fa6; -moz-border-radius: .5em; -webkit-border-radius: .5em; border-radius: .5em; color: #ffffff; }
 #textwise_contentlinks a.selected:hover { color: #000000; }
 
 #textwise_tags { list-style-type: none; padding: 0px;  }
 #textwise_tags li { margin: 5px; padding: 0px; display: inline; float: left; }
 #textwise_tags a { color: #696969; padding: 0px 1em; cursor: pointer; }
 #textwise_tags a:hover { color: #000000; }
-#textwise_tags a.selected { background: #fc2fa6; -moz-border-radius: .5em; color: #ffffff; }
+#textwise_tags a.selected { background: #fc2fa6; -moz-border-radius: .5em; -webkit-border-radius: .5em; border-radius: .5em; color: #ffffff; }
 #textwise_tags a.selected:hover { color: #000000; }
 
 #textwise_cats { list-style-type: none; padding: 0px; }
 #textwise_cats li { margin: 5px; padding: 0px; display: inline; float: left; }
 #textwise_cats a { color: #696969; padding: 0px 1em; cursor: pointer; }
 #textwise_cats a:hover { color: #000000; }
-#textwise_cats a.selected { background: #fc2fa6; -moz-border-radius: .5em; color: #ffffff; }
+#textwise_cats a.selected { background: #fc2fa6; -moz-border-radius: .5em; -webkit-border-radius: .5em; border-radius: .5em; color: #ffffff; }
 #textwise_cats a.selected:hover { color: #000000; }
 
 .clear { clear: both; }
@@ -34,6 +34,8 @@
 	background: #ffffff;
 	border: solid 4px #01cc01;
 	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
 	text-align: center;
 	padding: 6px;
 /*	max-width: 500px; */
@@ -48,6 +50,8 @@
 	padding: 3px;
 	border: solid 2px #01cc01;
 	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
 }
 
 #textwise_preview_captions {
@@ -150,6 +154,8 @@ img.textwise_help { cursor: pointer; }
 	background: #ffffff;
 	border: solid 2px #01cc01;
 	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
 	padding: 10px;
 	width: 300px;
 }

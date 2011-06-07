@@ -2,8 +2,8 @@
 Contributors: textwise
 Tags: semantic, admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, articles
 Requires at least: 2.8.6
-Tested up to: 3.0.4
-Stable tag: 1.1.6
+Tested up to: 3.1.3
+Stable tag: 1.1.7
 
 Use the power of TextWise Similarity Search technology to find related images, videos, and other content to your blog post as you edit.
 
@@ -105,6 +105,12 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Changelog ==
 
+= 1.1.7 - June 2011 =
+* Remove underscores from Category suggestions
+* Improved UI CSS for Internet Explorer, Chrome, and Safari
+* Better support of HTML editor
+* Fixed embed flash support for YouTube removed in WP 3.1
+
 = 1.1.6 - February 2011 =
 * Removed all short tags
 * Updated registration URL
@@ -127,6 +133,9 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 * Support for WordPress 2.9.2 post edit interface
 
 == Upgrade Notice ==
+
+= 1.1.7 =
+Fixed video support in WP 3.1, UI enhancements and bug fixes
 
 = 1.1.6 =
 Removed short tags per plugin coding compatibility standards

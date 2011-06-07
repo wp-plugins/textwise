@@ -3,11 +3,11 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://textwise.com/tools/wordpress-plugin-0
 Description: SemanticHacker API integration for WordPress
-Version: 1.1.6
+Version: 1.1.7
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
-	Copyright 2008-2010  TextWise, LLC.  ( email : admin@semantichacker.com )
+	Copyright 2008-2011  TextWise, LLC.  ( email : admin@semantichacker.com )
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -235,11 +235,16 @@ function textwise_admin_page() {
 //Only runs on post.php & post-new.php (see load-* action)
 function textwise_init_editor() {
 	global $wp_version;
-	wp_enqueue_script('textwise', '/wp-content/plugins/textwise/textwise.js');
-	wp_enqueue_style('textwise', '/wp-content/plugins/textwise/textwise.css');
+	wp_enqueue_script('textwise', WP_PLUGIN_URL . '/textwise/textwise.js');
+	wp_enqueue_style('textwise', WP_PLUGIN_URL . '/textwise/textwise.css');
 	add_action('admin_print_scripts', 'textwise_dataobject');
 	add_action('save_post', 'textwise_savepost');
 	add_action('admin_footer', 'textwise_admin_footer');
+
+	//Re-enable relevant code for media plugin - affects YouTube video
+	if ( $wp_version >= '3.1' ) {
+		add_filter( 'mce_external_plugins', 'textwise_tinymce_plugins' );
+	}
 
 	//Necessary for 2.7+ but introduced somewhere between 2.6.1 - 2.6.4
 	if (function_exists('add_meta_box')) {
@@ -266,6 +271,11 @@ function textwise_init_editor() {
 		//For older versions, add postboxes manually
 		add_action('edit_form_advanced', 'textwise_postboxes');
 	}
+}
+
+function textwise_tinymce_plugins($plugins) {
+	$plugins['tw_media'] = WP_PLUGIN_URL . '/textwise/tinymce/mediaplugin.js';
+	return $plugins;
 }
 
 function textwise_metabox_update() {
@@ -569,6 +579,7 @@ function textwise_ajax_content_update() {
 			$cat_results = array();
 		$arrCategories = array();
 		foreach ($cat_results as $c) {
+			$c['label'] = str_replace('_', ' ', $c['label']);
 			$arrCategories[] = textwise_esc_json($c['label']);
 		}
 		$data = "'".implode($arrCategories, "','")."'";
