@@ -57,8 +57,8 @@ function textwise_init() {
 	var helpImage = function(id){ return '<img id="'+id+'" class="textwise_help" src="'+textwise_settings.pluginDir+'/img/help.gif" alt="(?)" />';};
 	//Tags
 	if (textwise_dataobject.tag_enable == 1) {
-		jQuery(textwise_settings.tagchecklist).after('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_concept.gif" alt="Concept Tag Suggestions" />'
-			+'<img src="'+textwise_settings.pluginDir+'/img/head_powered_by_textwise.gif" alt="powered by TextWise" /></em> '
+		jQuery(textwise_settings.tagchecklist).after('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_concept.png" alt="Concept Tag Suggestions" />'
+			+'<img src="'+textwise_settings.pluginDir+'/img/head_powered_by_textwise.png" alt="powered by TextWise" /></em> '
 			+helpImage('textwise_tag_help')+'</p>'
 			+'<ul id="textwise_tags"><li><em>Start entering content and click Update Textwise Suggestions to begin</em></li></ul></div>'
 			+'<input id="textwise_tag_input" name="textwise_tag_input" style="display:none;"><br class="clearleft" />');
@@ -66,8 +66,8 @@ function textwise_init() {
 	}
 	//Categories
 	if (textwise_dataobject.cat_enable == 1) {
-		jQuery(textwise_settings.catlist).after('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_category.gif" alt="Category Suggestions" />'
-			+'<img src="'+textwise_settings.pluginDir+'/img/head_powered_by_textwise.gif" alt="powered by TextWise" /></em> '
+		jQuery(textwise_settings.catlist).after('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_category.png" alt="Category Suggestions" />'
+			+'<img src="'+textwise_settings.pluginDir+'/img/head_powered_by_textwise.png" alt="powered by TextWise" /></em> '
 			+helpImage('textwise_cat_help')+'</p>'
 			+'<ul id="textwise_cats"> </ul></div>'
 			+'<input id="textwise_cat_input" name="textwise_cat_input" style="display:none;"><br class="clearleft" />');
@@ -76,13 +76,13 @@ function textwise_init() {
 
 	//Content links
 	if (textwise_dataobject.contentlink_enable == 1) {
-		//jQuery('#postdivrich').append('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_link.gif" alt="TextWise Content Link Suggestions" /></em>'+helpImage('textwise_contentlink_help')+'</p><ul id="textwise_contentlinks"></li></ul></div><br class="clearleft"/>');
+		//jQuery('#postdivrich').append('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_link.png" alt="TextWise Content Link Suggestions" /></em>'+helpImage('textwise_contentlink_help')+'</p><ul id="textwise_contentlinks"></li></ul></div><br class="clearleft"/>');
 
 		//Check for metabox in 2.7+ or append to postdivrich
 		if (jQuery('#textwise_contentlinks_container').length) {
 			jQuery('#textwise_contentlinks_container').append('<ul id="textwise_contentlinks"></li></ul><br class="clearleft"/>');
 		} else {
-			jQuery('#postdivrich').append('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_link.gif" alt="TextWise Content Link Suggestions" /></em>'+helpImage('textwise_contentlink_help')+'</p><ul id="textwise_contentlinks"></li></ul></div><br class="clearleft"/>');
+			jQuery('#postdivrich').append('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_link.png" alt="TextWise Content Link Suggestions" /></em>'+helpImage('textwise_contentlink_help')+'</p><ul id="textwise_contentlinks"></li></ul></div><br class="clearleft"/>');
 		}
 	}
 
@@ -119,10 +119,10 @@ function textwise_init() {
 	} else {
 		jQuery('#submitdiv').after(twSidebar);	//Backup 2.7 postbox
 	}
-	twSidebar.html('<a id="textwise_update_button"><span id="textwise_update_status"><img align="top" src="'+textwise_settings.pluginDir+'/img/updatestatus.gif" alt="" /></span><img id="textwise_update_label" align="top" src="'+textwise_settings.pluginDir+'/img/updatebutton.gif" alt="Update Suggestions" /></a>');
+	twSidebar.html('<a id="textwise_update_button"><span id="textwise_update_status"><img align="top" src="'+textwise_settings.pluginDir+'/img/updatestatus.gif" alt="" /></span><img id="textwise_update_label" align="top" src="'+textwise_settings.pluginDir+'/img/updatebutton.png" alt="Update Suggestions" /></a>');
 	jQuery('#textwise_update_button').click(textwise_checkContent)
-		.mousedown(function(){jQuery('#textwise_update_label').attr('src', textwise_settings.pluginDir+'/img/updatebutton_down.gif')})
-		.mouseup(function(){jQuery('#textwise_update_label').attr('src', textwise_settings.pluginDir+'/img/updatebutton.gif')});
+		.mousedown(function(){jQuery('#textwise_update_label').attr('src', textwise_settings.pluginDir+'/img/updatebutton_down.png')})
+		.mouseup(function(){jQuery('#textwise_update_label').attr('src', textwise_settings.pluginDir+'/img/updatebutton.png')});
 
 	jQuery('.textwise_help').click(textwise_help_bubble).mouseout(function(){jQuery('#textwise_bubble').hide();});
 
@@ -182,9 +182,7 @@ function textwise_getEditor() {
 	if (textwise_dataobject.wpVersion < '2.7') {
 		return wpTinyMCEConfig.defaultEditor;
 	} else {
-		var editor = getUserSetting('editor');
-		editor = (editor == '') ? 'tinymce' : editor;
-		return editor;
+		return tinyMCE && tinyMCE.activeEditor && !tinyMCE.activeEditor.isHidden() ? 'tinymce' : 'html';
 	}
 }
 
@@ -342,7 +340,7 @@ function textwise_contentUpdate() {
 
 function textwise_contentUpdateCallback(response) {
 	var res = wpAjax.parseAjaxResponse(response);
-//	console.log(res);
+
 	var results = {};
 	if ( res && res.responses && res.responses.length ) {
 		for (i=0; i<res.responses.length; i++) {
@@ -1013,18 +1011,33 @@ function textwise_image_hover(e) {
 
 /** Videos **/
 
+function textwise_video_source(objVid) {
+	var vidSrc = null;
+	//Pre 3.2 media placeholder puts video info in the title attribute
+	var vidSrcData = jQuery(objVid).attr('title');
+	if ( vidSrcData ) {
+		vidSrc = eval("({"+vidSrcData+"})");
+	} else {
+		//Newer versions use something more complex..
+		vidSrcData = jQuery(objVid).attr('data-mce-json');
+		vidSrc = eval("("+vidSrcData+")").params;
+	}
+
+	return vidSrc;
+}
 function textwise_sync_video_list() {
 	var tableVid = jQuery('#textwise_video_table tr');
 	tableVid.empty();
 
 	var rich = (textwise_getEditor() == 'tinymce');
+
 	var videolist = [];
 	if ( rich && tinyMCE.activeEditor ) {
 		var ed = tinyMCE.activeEditor;
 		//TinyMCE encloses the video in an image tag
 		var editor_videos = jQuery(ed.getBody()).find('span.tw_selvid img.mceItemFlash');
 		jQuery.each(editor_videos, function(i, objVid){
-			var vidSrc = eval("({"+jQuery(objVid).attr('title')+"})");
+			var vidSrc = textwise_video_source(objVid);
 			videolist.push(vidSrc.src);
 		});
 	} else {
@@ -1074,15 +1087,12 @@ function textwise_video_toggle(e) {
 	//Find inserted videos in the DOM, put into array
 	var editor_videos = [];
 	i_dom.find('span.tw_selvid img').each(function(i, obj){
-		var tagTitle = jQuery(obj).attr('title');
 		var tagObj = {};
-		if (tagTitle && tagTitle != 'undefined') {
-			try {	//If an image wanders into a span for TW videos, the title attrib won't evaluate as JSON properly
-				tagObj = eval('({'+tagTitle+'})');
-			} catch(err) { }
-			if (tagObj.src == videoObj.enclosureUrl) {
-				editor_videos.push(obj);
-			}
+		try {	//If an image wanders into a span for TW videos, the title attrib won't evaluate as JSON properly
+			tagObj = textwise_video_source(obj);
+		} catch(err) { }
+		if (tagObj.src == videoObj.enclosureUrl) {
+			editor_videos.push(obj);
 		}
 	});
 
@@ -1106,26 +1116,19 @@ function textwise_video_toggle(e) {
 	//Add to content
 		var vidSrc = videoObj.enclosureUrl;
 		var vidTitle = videoObj.title;
-		htmlTag = '<span class="tw_selvid"><img class="mceItemFlash" title="&quot;src&quot;:&quot;'+textwise_html_esc(vidSrc)
-			+'&quot;" src="../wp-content/plugins/textwise/tinymce/trans.gif" '
-			+'mce_src="../wp-content/plugins/textwise/tinymce/trans.gif" alt="" width="'+vidW
-			+'" height="'+vidH+'"></span>';
+		//New html tag
+		htmlTag = '<span class="tw_selvid"><object width="'+vidW+'" height="'+vidH+'" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0">'
+			+'<param name="src" value="'+textwise_html_esc(vidSrc)+'" />'
+			+'<embed width="'+vidW+'" height="'+vidH+'" type="application/x-shockwave-flash" src="'+textwise_html_esc(vidSrc)+'" />'
+			+'</object></span>';
 		if ( rich && tinyMCE.activeEditor ) {
 			tinyMCE.activeEditor.focus(false);
 			var el = tinyMCE.activeEditor.selection.getNode();
 			var el2 = textwise_tinymce_special_node(el);
 			el = !el2 ? el : jQuery(el2).parent();
-//			el = (el == el2) ? el : jQuery(el2).parent();
 			if (jQuery(el).is('a')) { el = jQuery(el).parent(); }
 			jQuery(el).prepend(htmlTag);
-
-//			if (el != el2) {
-//				tinyMCE.activeEditor.selection.setNode(el2);
-//				tinyMCE.activeEditor.selection.collapse(true);
-//			}
-//			tinyMCE.execCommand('mceInsertContent', false, htmlTag);
-//			tinyMCE.execInstanceCommand('content', 'mceInsertContent', false, htmlTag, true)
-
+			tinyMCE.activeEditor.execCommand('mceCleanup');
 		} else {
 			edInsertContent(edCanvas, htmlTag);
 		}
@@ -1570,9 +1573,10 @@ function textwise_nodeChanged(e) {
 
 	var edVideos = [];
 	jQuery(doc).find('span.tw_selvid img.mceItemFlash').each(function(i, objVid){
-		var embd = jQuery(objVid).attr('src');;
+		var embd = jQuery(objVid).attr('src');
 		if (embd != 'undefined') {
-			embd = eval('({'+jQuery(objVid).attr('title')+'})');
+			//embd = eval('({'+jQuery(objVid).attr('title')+'})');
+			embd = textwise_video_source(objVid);
 			edVideos.push(embd.src);
 		}
 	});
@@ -1629,7 +1633,7 @@ function textwise_nodeRemoved(e) {
 	jQuery(doc).find('span.tw_selvid img.mceItemFlash').each(function(i, objVid){
 		var embd = jQuery(objVid).attr('src');;
 		if (embd != 'undefined') {
-			embd = eval('({'+jQuery(objVid).attr('title')+'})');
+			embd = textwise_video_source(objVid);
 			edVideos.push(embd.src);
 		}
 	});

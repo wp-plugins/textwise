@@ -3,7 +3,7 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://textwise.com/tools/wordpress-plugin-0
 Description: SemanticHacker API integration for WordPress
-Version: 1.1.7
+Version: 1.2.1
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
@@ -173,6 +173,7 @@ function textwise_verify_token() {
 			$invalid = 'n';
 		}
 
+
 		update_option('textwise_api_token_invalid', $invalid);
 	}
 }
@@ -242,7 +243,8 @@ function textwise_init_editor() {
 	add_action('admin_footer', 'textwise_admin_footer');
 
 	//Re-enable relevant code for media plugin - affects YouTube video
-	if ( $wp_version >= '3.1' ) {
+	//Different solution for WP 3.2
+	if ( $wp_version >= '3.1' && $wp_version < '3.2' ) {
 		add_filter( 'mce_external_plugins', 'textwise_tinymce_plugins' );
 	}
 
@@ -379,18 +381,18 @@ function textwise_metabox_links() {
 ?>
 <div style="position: relative; width: 100%;">
 <?php	if (get_option('textwise_rss_enable') == '1') { ?>
-	<h4><img src="<?php bloginfo('wpurl') ?>/wp-content/plugins/textwise/img/head_suggestions_blog-news.gif" alt="textwise Blog &amp; News Suggestions" /></h4>
+	<h4><img src="<?php bloginfo('wpurl') ?>/wp-content/plugins/textwise/img/head_suggestions_blog-news.png" alt="textwise Blog &amp; News Suggestions" /></h4>
 	<div id="textwise_related_blogs"></div>
 	<textarea id="textwise_rss_input" name="textwise_rss_input" style="display: none;"><?php echo trim(stripslashes($rss_list));?></textarea>
 <?php	}
 	if (get_option('textwise_wiki_enable') == '1') { ?>
-	<h4><img src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/head_suggestions_wiki.gif" alt="textwise Wiki Suggestions" /></h4>
+	<h4><img src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/head_suggestions_wiki.png" alt="textwise Wiki Suggestions" /></h4>
 	<div id="textwise_related_wiki"></div>
 	<textarea id="textwise_wiki_input" name="textwise_wiki_input" style="display: none;" ><?php echo trim(stripslashes($wiki_list));?></textarea>
 
 <?php	}
 	if (get_option('textwise_product_enable') == '1') { ?>
-	<h4><img src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/head_suggestions_product.gif" alt="textwise Product Suggestions" /></h4>
+	<h4><img src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/head_suggestions_product.png" alt="textwise Product Suggestions" /></h4>
 	<div style="overflow: auto; position: relative; width: 100%;">
 		<table id="textwise_product_table"><tr></tr></table>
 	</div>

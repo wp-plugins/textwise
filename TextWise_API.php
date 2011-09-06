@@ -284,16 +284,34 @@ class TextWise_API
 			$params['http']['header'] .= "{$value}\r\n";
 		}
 
-		$ctx = stream_context_create($params);
-		$fp = @fopen($url, 'rb', false, $ctx);
+		$httpreq = parse_url($url);
+		$http_host = $httpreq['host'];
+		$http_path = $httpreq['path'];
+		$http_query = $httpreq['query'];
+		$crlf = "\r\n";
+
+//		$ctx = stream_context_create($params);
+//		$fp = @fopen($url, 'rb', false, $ctx);
+		$fp = @fsockopen($http_host, 80, $ferrnum, $ferrstr, 30);
 		if ($fp) {
-			stream_set_timeout($fp, 30);
+			//??
 		} else {
 			return array('error' => 'Your web server cannot connect to the TextWise API'.print_r($params, true));
 		}
 
+		$request = "POST {$http_path}";
+		if ( $http_query ) $request .= "?{$http_query}";
+		$request .= " HTTP/1.0$crlf";
+		$request .= implode($crlf, $headers). $crlf;
+		$request .= 'Host: '. $http_host . $crlf;
+		$request .= $crlf;
+		$request .= $data;
+		$request .= $crlf.$crlf;
+
+		fwrite( $fp, $request );
+
 		$response = '';
-			while (!feof($fp)) {
+		while (!feof($fp)) {
 			$response .= fread($fp, 8192);
 		}
 
@@ -302,15 +320,17 @@ class TextWise_API
 		    return array('error' => "Your web server cannot read data from $url, $php_errormsg");
 		}
 
+		list( $response_header, $response_body ) = explode( "\r\n\r\n", $response, 2 );
+
 		fclose($fp);
-		return $response;
+		return $response_body;
 	}
 
 	function do_post_request_curl($url, $data, $headers) {
 		$curl = curl_init($url);
 		curl_setopt($curl, CURLOPT_POST, true);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($curl, CURLOPT_FAILONERROR, true);
+		curl_setopt($curl, CURLOPT_FAILONERROR, false);
 		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $data);

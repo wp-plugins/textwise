@@ -1,4 +1,4 @@
-#textwise_sidebar { padding-top: 1em; }
+#textwise_sidebar { padding-top: 1em; background-color: transparent; }
 #textwise_update_button { position: relative; width: 177px; margin: 0px auto; display: block; cursor: pointer; text-align: center; }
 #textwise_update_status { position: absolute; top: 17px; left: 14px; }
 
