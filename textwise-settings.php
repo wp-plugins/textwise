@@ -67,19 +67,19 @@ function textwise_opt_logo() {
 					<div id="use_logo">
 						Which variation of the logo should be used?<br />
 						<label for="logo-1"><input id="logo-1" type="radio" name="textwise_use_logo" value="1" <?php echo ( get_option('textwise_use_logo') == '1') ? 'checked' : ''; ?> />
-							Powered by <img src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/textwise_logo.gif" alt="standard logo" />
+							Powered by <img src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/textwise_logo.png" alt="standard logo" />
 							<em>(transparent image for use with themes with light backgrounds)</em>
 							</label><br />
 						<label for="logo-2"><input id="logo-2" type="radio" name="textwise_use_logo" value="2" <?php echo ( get_option('textwise_use_logo') == '2') ? 'checked' : ''; ?>/>
-							Powered by <img src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/textwise_logo_bw.gif" alt="grayscale for light backgrounds" />
+							Powered by <img src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/textwise_logo_bw.png" alt="grayscale for light backgrounds" />
 							<em>(transparent image for use with themes with light backgrounds)</em>
 							</label><br />
 						<label for="logo-3"><input id="logo-3" type="radio" name="textwise_use_logo" value="3" <?php echo ( get_option('textwise_use_logo') == '3') ? 'checked' : ''; ?>/>
-							Powered by <img style="padding: 2px; background: black;" src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/textwise_logo_i.gif" alt="color for dark backgrounds" />
+							Powered by <img style="padding: 2px; background: black;" src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/textwise_logo_i.png" alt="color for dark backgrounds" />
 							<em>(transparent image for use with themes with dark backgrounds)</em>
 							</label><br />
 						<label for="logo-4"><input id="logo-4" type="radio" name="textwise_use_logo" value="4" <?php echo ( get_option('textwise_use_logo') == '4') ? 'checked' : ''; ?>/>
-							Powered by <img style="padding: 2px; background: black;" src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/textwise_logo_bwi.gif" alt="grayscale for dark backgrounds" />
+							Powered by <img style="padding: 2px; background: black;" src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/textwise_logo_bwi.png" alt="grayscale for dark backgrounds" />
 							<em>(transparent image for use with themes with dark backgrounds)</em>
 							</label>
 					</div>

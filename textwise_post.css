@@ -5,6 +5,7 @@
 
 #textwise_suggestions .bottomleft { float: left; }
 #textwise_suggestions .bottomright { float: right; }
+#textwise_suggestions h4 img { vertical-align: baseline; }
 
 #textwise_suggestions .tw_itemrow td {
 	padding-bottom: 10px;
@@ -14,8 +15,6 @@
 	padding-right: 20px;
 	text-align: center;
 }
-
-#textwise_suggestions .tw_products img { }
 
 #textwise_suggestions .tw_products span.title {
 	display: block;

@@ -1,9 +1,9 @@
 === TextWise Similarity Search ===
 Contributors: textwise
 Tags: semantic, admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, articles
-Requires at least: 2.8.6
-Tested up to: 3.2.1
-Stable tag: 1.2.1
+Requires at least: 3.1
+Tested up to: 3.3.1
+Stable tag: 1.2.2
 
 Use the power of TextWise Similarity Search technology to find related images, videos, and other content to your blog post as you edit.
 
@@ -105,6 +105,9 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Changelog ==
 
+= 1.2.2 - April 2012 =
+* Update TextWise branding
+* Use capability in admin menu definition
 
 = 1.2.1 - August 2011 =
 * Improved back-end look and feel to work with WP 3.2 redesign
@@ -139,6 +142,9 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Upgrade Notice ==
 
+= 1.2.2 =
+Updated TextWise branding. Updated admin menu call to use capability instead of level.
+
 = 1.2.1 =
 Improved appearance with 3.2 back-end, video embed tag bug fixes
 
@@ -164,6 +170,6 @@ Fixes Tag and Category suggestions under Wordpress 2.9
 == Screenshots ==
 
 1. An example of the TextWise plugin publishing interface
-1. Video and Image Suggestions
+1. Image and Video Suggestions
 1. Relevant Content Suggestions
 1. Tag and Category Suggestions

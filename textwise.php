@@ -230,7 +230,7 @@ function textwise_dependency_warning() {
 
 //Add link to plugin settings page
 function textwise_admin_page() {
-	add_options_page('TextWise Plugin', 'TextWise', 8, dirname(__FILE__).'/textwise-settings.php');
+	add_options_page('TextWise Plugin', 'TextWise', 'manage_options', dirname(__FILE__).'/textwise-settings.php');
 }
 
 //Only runs on post.php & post-new.php (see load-* action)
@@ -381,18 +381,24 @@ function textwise_metabox_links() {
 ?>
 <div style="position: relative; width: 100%;">
 <?php	if (get_option('textwise_rss_enable') == '1') { ?>
-	<h4><img src="<?php bloginfo('wpurl') ?>/wp-content/plugins/textwise/img/head_suggestions_blog-news.png" alt="textwise Blog &amp; News Suggestions" /></h4>
+	<h4 class="textwise_powered_by"><img src="<?php bloginfo('wpurl') ?>/wp-content/plugins/textwise/img/textwise_logo.png" alt="textwise Blog &amp; News Suggestions" />
+		<span class="textwise_powered_by_section">Blog &amp; News</span> Suggestions
+	</h4>
 	<div id="textwise_related_blogs"></div>
 	<textarea id="textwise_rss_input" name="textwise_rss_input" style="display: none;"><?php echo trim(stripslashes($rss_list));?></textarea>
 <?php	}
 	if (get_option('textwise_wiki_enable') == '1') { ?>
-	<h4><img src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/head_suggestions_wiki.png" alt="textwise Wiki Suggestions" /></h4>
+	<h4 class="textwise_powered_by"><img src="<?php bloginfo('wpurl') ?>/wp-content/plugins/textwise/img/textwise_logo.png" alt="TextWise Wikipedia Suggestions" />
+		<span class="textwise_powered_by_section">Wikipedia</span> Suggestions
+	</h4>
 	<div id="textwise_related_wiki"></div>
 	<textarea id="textwise_wiki_input" name="textwise_wiki_input" style="display: none;" ><?php echo trim(stripslashes($wiki_list));?></textarea>
 
 <?php	}
 	if (get_option('textwise_product_enable') == '1') { ?>
-	<h4><img src="<?php bloginfo('wpurl')?>/wp-content/plugins/textwise/img/head_suggestions_product.png" alt="textwise Product Suggestions" /></h4>
+	<h4 class="textwise_powered_by"><img src="<?php bloginfo('wpurl') ?>/wp-content/plugins/textwise/img/textwise_logo.png" alt="TextWise Product Suggestions" />
+		<span class="textwise_powered_by_section">Product</span> Suggestions
+	</h4>
 	<div style="overflow: auto; position: relative; width: 100%;">
 		<table id="textwise_product_table"><tr></tr></table>
 	</div>
@@ -839,19 +845,19 @@ function textwise_content_filter($content = '') {
 	$logoPlace = get_option('textwise_logo_place') ? get_option('textwise_logo_place') : 'section';
 	switch (get_option('textwise_use_logo')) {
 		case '1':
-			$logoSrc = get_bloginfo('wpurl').'/wp-content/plugins/textwise/img/textwise_logo.gif';
+			$logoSrc = get_bloginfo('wpurl').'/wp-content/plugins/textwise/img/textwise_logo.png';
 			break;
 		case '2':
-			$logoSrc = get_bloginfo('wpurl').'/wp-content/plugins/textwise/img/textwise_logo_bw.gif';
+			$logoSrc = get_bloginfo('wpurl').'/wp-content/plugins/textwise/img/textwise_logo_bw.png';
 			break;
 		case '3':
-			$logoSrc = get_bloginfo('wpurl').'/wp-content/plugins/textwise/img/textwise_logo_i.gif';
+			$logoSrc = get_bloginfo('wpurl').'/wp-content/plugins/textwise/img/textwise_logo_i.png';
 			break;
 		case '4':
-			$logoSrc = get_bloginfo('wpurl').'/wp-content/plugins/textwise/img/textwise_logo_bwi.gif';
+			$logoSrc = get_bloginfo('wpurl').'/wp-content/plugins/textwise/img/textwise_logo_bwi.png';
 			break;
 		default:
-			$logoSrc = get_bloginfo('wpurl').'/wp-content/plugins/textwise/img/textwise_logo.gif';
+			$logoSrc = get_bloginfo('wpurl').'/wp-content/plugins/textwise/img/textwise_logo.png';
 	}
 	$logoTag = 'Powered by <a href="http://www.textwise.com/" target="_blank"><img border="0" src="%s" alt="TextWise" align="top" /></a>';
 	$logoHtml = $logoSrc != '' ? sprintf($logoTag, $logoSrc) : '';

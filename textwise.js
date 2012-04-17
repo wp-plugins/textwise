@@ -57,8 +57,9 @@ function textwise_init() {
 	var helpImage = function(id){ return '<img id="'+id+'" class="textwise_help" src="'+textwise_settings.pluginDir+'/img/help.gif" alt="(?)" />';};
 	//Tags
 	if (textwise_dataobject.tag_enable == 1) {
-		jQuery(textwise_settings.tagchecklist).after('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_concept.png" alt="Concept Tag Suggestions" />'
-			+'<img src="'+textwise_settings.pluginDir+'/img/head_powered_by_textwise.png" alt="powered by TextWise" /></em> '
+		jQuery(textwise_settings.tagchecklist).after('<div><p><em class="textwise_powered_by">'
+			+'<span class="textwise_powered_by_section">Concept Tag Suggestions</span><br />'
+			+'Powered By <img src="'+textwise_settings.pluginDir+'/img/textwise_logo.png" alt="powered by TextWise" /></em> '
 			+helpImage('textwise_tag_help')+'</p>'
 			+'<ul id="textwise_tags"><li><em>Start entering content and click Update Textwise Suggestions to begin</em></li></ul></div>'
 			+'<input id="textwise_tag_input" name="textwise_tag_input" style="display:none;"><br class="clearleft" />');
@@ -66,8 +67,9 @@ function textwise_init() {
 	}
 	//Categories
 	if (textwise_dataobject.cat_enable == 1) {
-		jQuery(textwise_settings.catlist).after('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_category.png" alt="Category Suggestions" />'
-			+'<img src="'+textwise_settings.pluginDir+'/img/head_powered_by_textwise.png" alt="powered by TextWise" /></em> '
+		jQuery(textwise_settings.catlist).after('<div><p><em class="textwise_powered_by">'
+			+'<span class="textwise_powered_by_section">Category Suggestions</span><br />'
+			+'Powered By <img src="'+textwise_settings.pluginDir+'/img/textwise_logo.png" alt="powered by TextWise" /></em> '
 			+helpImage('textwise_cat_help')+'</p>'
 			+'<ul id="textwise_cats"> </ul></div>'
 			+'<input id="textwise_cat_input" name="textwise_cat_input" style="display:none;"><br class="clearleft" />');
@@ -119,7 +121,7 @@ function textwise_init() {
 	} else {
 		jQuery('#submitdiv').after(twSidebar);	//Backup 2.7 postbox
 	}
-	twSidebar.html('<a id="textwise_update_button"><span id="textwise_update_status"><img align="top" src="'+textwise_settings.pluginDir+'/img/updatestatus.gif" alt="" /></span><img id="textwise_update_label" align="top" src="'+textwise_settings.pluginDir+'/img/updatebutton.png" alt="Update Suggestions" /></a>');
+	twSidebar.html('<a id="textwise_update_button"><span id="textwise_update_status"><img align="top" src="'+textwise_settings.pluginDir+'/img/updatestatus.gif" alt="" /></span></a>');
 	jQuery('#textwise_update_button').click(textwise_checkContent)
 		.mousedown(function(){jQuery('#textwise_update_label').attr('src', textwise_settings.pluginDir+'/img/updatebutton_down.png')})
 		.mouseup(function(){jQuery('#textwise_update_label').attr('src', textwise_settings.pluginDir+'/img/updatebutton.png')});
