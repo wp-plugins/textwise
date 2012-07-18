@@ -1,11 +1,10 @@
-/*************************
-* (c) 2008-2010 TextWise, LLC *
-*************************/
+/******************************
+* (c) 2008-2012 TextWise, LLC *
+******************************/
 
 //Case insensitive 'contains' matches
 
 jQuery.extend(jQuery.expr[':'], {
-	//contains : "jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0"	//Worked in WP2.7
 	contains : function(a, i, m) {
 		return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0;
 	}
@@ -78,8 +77,6 @@ function textwise_init() {
 
 	//Content links
 	if (textwise_dataobject.contentlink_enable == 1) {
-		//jQuery('#postdivrich').append('<div><p><em><img src="'+textwise_settings.pluginDir+'/img/head_suggestions_link.png" alt="TextWise Content Link Suggestions" /></em>'+helpImage('textwise_contentlink_help')+'</p><ul id="textwise_contentlinks"></li></ul></div><br class="clearleft"/>');
-
 		//Check for metabox in 2.7+ or append to postdivrich
 		if (jQuery('#textwise_contentlinks_container').length) {
 			jQuery('#textwise_contentlinks_container').append('<ul id="textwise_contentlinks"></li></ul><br class="clearleft"/>');
@@ -127,8 +124,6 @@ function textwise_init() {
 		.mouseup(function(){jQuery('#textwise_update_label').attr('src', textwise_settings.pluginDir+'/img/updatebutton.png')});
 
 	jQuery('.textwise_help').click(textwise_help_bubble).mouseout(function(){jQuery('#textwise_bubble').hide();});
-
-	//textwise_getContent();
 
 	//Always check content when loading page if not completely new
 	setTimeout(textwise_contentUpdate, 2000);
@@ -191,7 +186,6 @@ function textwise_getEditor() {
 // Force editor to process rich text content into HTML or grab cleaned HTML content
 // Returns post title and content
 function textwise_getContent() {
-//	var rich = (typeof tinyMCE != "undefined") && tinyMCE.activeEditor && !tinyMCE.activeEditor.isHidden();
 	var rich = (textwise_getEditor() == 'tinymce');
 	var post_title = jQuery('#title').val();
 	var post_content = '';
@@ -210,8 +204,6 @@ function textwise_getContent() {
 	post_content = post_content.replace(/\[(?:wp_)?caption([^\]]+)\]([\s\S]+?)\[\/(?:wp_)?caption\][\s\u00a0]*/g, '');
 
 	//Strip default captions. Include user-defined captions in semantic search
-//	post_content = post_content.replace(/>Source: Wikipedia</g, '><');
-//	post_content = post_content.replace(/>Source: Flickr</g, '><');
 	post_content = post_content.replace(/<dd .*?wp-caption-dd.*?>.*?<\/dd>/gi, '');
 	var result = post_title+' '+post_content;
 	if (result == ' ' || result == ' <p><br mce_bogus="1"></p>') { result = ''; }
@@ -544,7 +536,6 @@ function textwise_updateStatus(status) {
 function textwise_sync_contentlink_list() {
 	var rich = (textwise_getEditor() == 'tinymce');
 	if ( rich && tinyMCE.activeEditor ) {
-//		tinyMCE.activeEditor.getDoc().ignoreDOM = true;
 		var ed = tinyMCE.activeEditor;
 		i_dom = jQuery(ed.getBody());
 	} else {
@@ -561,15 +552,13 @@ function textwise_sync_contentlink_list() {
 			ulLinks.append('<li><a class="textwise_tag_link selected">'+textwise_html_esc(tag)+'</a></li>');
 		}
 	});
-
-
 }
 
 function textwise_link_toggle() {
 	var term = jQuery(this).text();
 	var re_term_esc = new RegExp('([\\\\\\|\\(\\)\\[\\{\\^\\$\\*\\+\\?\\.])', 'g');
 	var esc_term = term.replace(re_term_esc, '\\$1');
-	var re_term = new RegExp('(\\b|[^\\w])('+esc_term+')(\\b|[^\\w])', 'i');
+	var re_term = new RegExp('(\\b|[^\\w])('+esc_term+')($|\\b|[^\\w])', 'i');
 	var newTag = '$1<a class="tw_contentlink" href="http://en.wikipedia.org/w/index.php?search=$2&go=Go">$2</a>$3';
 	var rich = (textwise_getEditor() == 'tinymce');
 	var i_dom = textwise_getIDom();
@@ -595,7 +584,6 @@ function textwise_link_toggle() {
 					+ oldcontent.substring(end+1, oldcontent.length);
 				if (newcontent != oldcontent) { break; }
 			}
-//			var newcontent = items.html().replace(re_term, newTag);
 
 			items.html(newcontent);
 			jQuery(this).addClass('selected');
@@ -726,8 +714,7 @@ function textwise_wptag_remove() {
 			newtags.push(obj);
 		}
 	});
-//	var twnum = jQuery.inArray(current_tags[num], tw_tags);
-//	delete tw_tags[twnum];
+
 	jQuery('#textwise_tag_input').val(newtags.join(','));
 	jQuery('#textwise_tags .textwise_tag_link.selected:contains('+current_tags[num]+')').removeClass('selected');
 	setTimeout(textwise_wptag_rebind, 100);
@@ -754,7 +741,6 @@ function textwise_sync_cat_list() {
 	jQuery.each(common_cats, function(i, cat){
 		ulCat.append('<li><a class="term selected">'+cat+'</a></li>');
 	});
-//	jQuery('#textwise_cat_input').val(common_cats.join(','));
 }
 
 function textwise_cat_toggle() {
@@ -856,8 +842,6 @@ function textwise_sync_image_list() {
 	var image_meta = textwise_deserialize_metablock(jQuery('#textwise_image_input').val());
 	var image_meta_final = [];
 	jQuery.each(image_meta, function(i, objImg){
-//		alert(imagelist[0]);
-//		alert(objImg.imageUrl);
 		if (jQuery.inArray(objImg.imageUrl, imagelist) != -1) {
 			tableImg.append(textwise_html_image(objImg, true));
 			image_meta_final.push(objImg);
@@ -876,7 +860,6 @@ function textwise_image_toggle(e) {
 	if (jQuery(e.target).is('a')) { return; }
 	var imageObj = jQuery(this).data('twdata');
 	var imageData = textwise_deserialize_metablock(jQuery('#textwise_image_input').val());
-//	var rich = (typeof tinyMCE != 'undefined' && tinyMCE.getInstanceById('content'));
 	var rich = (textwise_getEditor() == 'tinymce');
 
 	//Get the DOM from either editor
@@ -917,9 +900,7 @@ function textwise_image_toggle(e) {
 			var el = tinyMCE.activeEditor.selection.getNode();
 			var el2 = textwise_tinymce_special_node(el);
 			//If selected node is a special node, insert in it, otherwise insert outside of it
-//			el = (el == el2) ? el : jQuery(el2).parent();
 			el = !el2 ? el : jQuery(el2).parent();
-//			if (el2) { el = jQuery(el2).parent(); }
 			if (jQuery(el).is('a')) { el = jQuery(el).parent(); }
 			jQuery(el).prepend(htmlTag);
 
@@ -1072,7 +1053,6 @@ function textwise_video_toggle(e) {
 	if (jQuery(e.target).is('a')) { return; }
 	var videoObj = jQuery(this).data('twdata');
 	var videoData = textwise_deserialize_metablock(jQuery('#textwise_video_input').val());
-//	var rich = (typeof tinyMCE != 'undefined' && tinyMCE.getInstanceById('content'));
 	var rich = (textwise_getEditor() == 'tinymce');
 	var i_dom;
 
