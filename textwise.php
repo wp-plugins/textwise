@@ -815,7 +815,7 @@ function textwise_content_filter($content = '') {
 		$logoHtml = '<div class="bottomright">'.$logoHtml.'</div>';
 	}
 
-	$post_meta = get_post_custom($post_ID);
+	$post_meta = get_post_custom();
 	//Is it enabled, are there results to display, for each section?
 	if (get_option('textwise_rss_enable') == 1 && isset($post_meta['_tw_rss_list'])) {
 		$objRss = textwise_deserialize_input(trim(stripslashes($post_meta['_tw_rss_list'][0])));
