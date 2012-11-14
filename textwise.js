@@ -110,6 +110,7 @@ function textwise_init() {
 
 	//Update button
 	//Conditional code to detect 2.7+ Dashboard layout
+/*
 	var twSidebar = jQuery('<div id="textwise_sidebar" class="side-info"></div>');
 	if (jQuery('#textwise_metabox_update').length) {	//2.7 postbox
 		jQuery('#textwise_metabox_update .inside').append(twSidebar);
@@ -119,6 +120,7 @@ function textwise_init() {
 		jQuery('#submitdiv').after(twSidebar);	//Backup 2.7 postbox
 	}
 	twSidebar.html('<a id="textwise_update_button"><span id="textwise_update_status"><img align="top" src="'+textwise_settings.pluginDir+'/img/updatestatus.gif" alt="" /></span></a>');
+*/
 	jQuery('#textwise_update_button').click(textwise_checkContent)
 		.mousedown(function(){jQuery('#textwise_update_label').attr('src', textwise_settings.pluginDir+'/img/updatebutton_down.png')})
 		.mouseup(function(){jQuery('#textwise_update_label').attr('src', textwise_settings.pluginDir+'/img/updatebutton.png')});
@@ -226,8 +228,7 @@ function textwise_getIDom() {
 function textwise_checkContent() {
 /*
  - Check to see if content has changed
- - Check Signature
- - If Signature is different make call to other services
+ - If content is different make call to other services
  - Populate areas
 */
 	if ( !textwise_settings.ajaxComplete ) {return;}
@@ -241,7 +242,6 @@ function textwise_checkContent() {
 
 	// FROM WP AUTOSAVE START //
 	// (bool) is rich editor enabled and active
-//	var rich = (typeof tinyMCE != "undefined") && tinyMCE.activeEditor && !tinyMCE.activeEditor.isHidden();
 	var rich = (textwise_getEditor() == 'tinymce');
 	/* Gotta do this up here so we can check the length when tinyMCE is in use */
 
@@ -262,49 +262,11 @@ function textwise_checkContent() {
 
 	if ( doCheck ) {
 		textwise_settings.postContentLast = post_content;
-		textwise_sigCheck();
+		textwise_contentUpdate();
 	} else {
 		//Turn off activity indicator in a sec
 		setTimeout(function(){textwise_updateStatus('off');}, 1000);
 	}
-}
-
-function textwise_sigCheck() {
-	if ( !textwise_settings.ajaxComplete ) {return;}
-	var post_content = textwise_getContent();
-	var post_data = {
-		action: "textwise_chk_sig",
-		post_ID:  jQuery("#post_ID").val() || 0,
-		content: post_content
-	};
-	textwise_settings.ajaxComplete = false;
-	jQuery.ajax({
-		data: post_data,
-		type: 'POST',
-		url: './admin-ajax.php',
-		success: textwise_sigCheckCallback
-	});
-
-}
-
-function textwise_sigCheckCallback(response) {
-	//response = <update|nochange>
-	// update = signatures do not match
-	// nochange = signatures match
-	var res = wpAjax.parseAjaxResponse(response);
-	textwise_settings.ajaxComplete = true;
-
-	if ( res && res.responses && res.responses.length ) {
-		var message = res.responses[0].data; // The saved message or error.
-		if (message == 'update' || textwise_settings.lastUpdateStatus != 'ok') {
-			textwise_contentUpdate();
-		} else {
-			textwise_updateStatus('off');
-		}
-	} else {
-		textwise_updateStatus('error');
-	}
-
 }
 
 function textwise_contentUpdate() {

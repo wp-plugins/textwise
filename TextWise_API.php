@@ -6,7 +6,6 @@ class TextWise_API
 	var $use_curl = false;
 
     // parameter names that will be passed for the various service Ids
-    var $_signatureId = 'ConfigurationID';
     var $_conceptId = 'ConfigurationID';
     var $_categoryId = 'ConfigurationID';
     var $_matchId = 'indexId';
@@ -41,11 +40,6 @@ class TextWise_API
     }
 
 	//Calls to services
-    function signature($parameters)
-    {
-        return $this->_send($parameters, 'signature');
-    }
-
     function concept($parameters)
     {
         return $this->_send($parameters, 'concept');
@@ -81,7 +75,6 @@ class TextWise_API
 
 		//Append additional settings (Configuration/Index Id) depending on service
 		switch ($service) {
-			case 'signature':
 			case 'concept':
 			case 'category':
 			case 'filter':
@@ -143,17 +136,6 @@ class TextWise_API
 		}
 
 		switch ($about['systemType']) {
-			case 'signature':
-				$dimensions = array();
-				if ( isset($arr['response'][0]['siggen'][0]['siggenResponse'][0]['signature'][0]['dimension']) ) {
-			    	foreach ($arr['response'][0]['siggen'][0]['siggenResponse'][0]['signature'][0]['dimension'] as $key => $val) {
-			    		$dimensions[$key]['weight']				= $val['weight'];
-			    		$dimensions[$key]['index']				= $val['index'];
-			    		$dimensions[$key]['label']				= $val['label'];
-		    		}
-				}
-	    		$result['dimensions'] = $dimensions;
-				break;
 			case 'concept':
 				$concepts = array();
 				if ( isset($arr['response'][0]['conceptExtractor'][0]['conceptExtractorResponse'][0]['concepts'][0]['concept']) ) {

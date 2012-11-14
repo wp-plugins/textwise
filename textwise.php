@@ -3,7 +3,7 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://textwise.com/tools/wordpress-plugin-0
 Description: SemanticHacker API integration for WordPress
-Version: 1.2.3
+Version: 1.3.0
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
@@ -29,10 +29,12 @@ define('TEXTWISE_API_URL', 'http://api.semantichacker.com/');
 define('TEXTWISE_AMAZON_REF', 'textwiseco23-20');
 
 //Load CSS and code for article output
-add_action('wp_head', 'textwise_global_header');
+add_action('wp_enqueue_scripts', 'textwise_frontend_style');
 add_filter('the_content', 'textwise_content_filter');
 
 //Actions to include on every admin page
+add_action('admin_init', 'textwise_admin_init');
+add_action('admin_init', 'textwise_token_update_check');
 add_action('admin_menu', 'textwise_admin_page');
 add_action('admin_notices', 'textwise_check_token');
 add_action('admin_notices', 'textwise_check_detectconflict');
@@ -42,32 +44,38 @@ add_action('admin_notices', 'textwise_dependency_warning');
 //Supported in 2.7+
 add_filter('plugin_action_links_textwise/textwise.php', 'textwise_plugin_links' );
 
-//Load when in admin section
-add_action('admin_init', 'textwise_admin_init');
-
 //Load on editor pages only, if token exists and is valid, and any service is enabled.
-if ( textwise_check_dependencies() && get_option('textwise_api_token') && get_option('textwise_api_token_invalid') == 'n' &&
-		( get_option('textwise_tag_enable') == '1' ||
-			get_option('textwise_contentlink_enable') == '1' ||
-			get_option('textwise_category_enable') == '1' ||
-			get_option('textwise_video_enable') == '1' ||
-			get_option('textwise_image_enable') == '1' ||
-			get_option('textwise_rss_enable') == '1' ||
-			get_option('textwise_wiki_enable') == '1' ||
-			get_option('textwise_product_enable') == '1' )
-	) {
+if ( is_admin()
+		&& textwise_check_dependencies()
+		&& get_option('textwise_api_token')
+		&& get_option('textwise_api_token_invalid') == 'n'
+		&& textwise_services_enabled() ) {
 	add_action('load-post.php', 'textwise_init_editor');
 	add_action('load-post-new.php', 'textwise_init_editor');
 }
 
 //AJAX Callbacks
-add_action('wp_ajax_textwise_chk_sig', 'textwise_ajax_chk_sig');
 add_action('wp_ajax_textwise_content_update', 'textwise_ajax_content_update');
 add_action('wp_ajax_textwise_nonce', 'textwise_ajax_nonce');
 add_action('wp_ajax_textwise_categoryinfo', 'textwise_ajax_categoryinfo');
 
-//Hook call function definitions
+function textwise_services_enabled() {
+	$service_settings = array(
+		'tag'            => get_option('textwise_tag_enable'),
+		'contentlink'    => get_option('textwise_contentlink_enable'),
+		'category'       => get_option('textwise_category_enable'),
+		'video'          => get_option('textwise_video_enable'),
+		'image'          => get_option('textwise_image_enable'),
+		'rss'            => get_option('textwise_rss_enable'),
+		'wiki'           => get_option('textwise_wiki_enable'),
+		'product'        => get_option('textwise_product_enable')
+	);
 
+	$enabled = array_filter( $service_settings );
+	return !empty( $enabled );
+}
+
+//Hook call function definitions
 
 function textwise_admin_init() {
 	//Set defaults
@@ -119,6 +127,13 @@ function textwise_admin_init() {
 
 }
 
+function textwise_token_update_check() {
+	//Token check
+	if ( isset( $_POST['textwise_api_token'] ) && $_POST['textwise_api_token'] != get_option('textwise_api_token') ) {
+		update_option('textwise_api_token_invalid', 'c');
+	}
+}
+
 // Add a link to this plugin's settings page (2.7+)
 function textwise_plugin_links($links) {
 	$infoUrl = get_bloginfo('wpurl'). '/wp-admin/options-general.php?page=textwise/textwise-settings.php';
@@ -147,10 +162,6 @@ function textwise_check_token() {
 	}
 }
 
-if ($_POST['textwise_api_token'] && $_POST['textwise_api_token'] != get_option('textwise_api_token') ) {
-	update_option('textwise_api_token_invalid', 'c');
-}
-
 function textwise_verify_token() {
 	if ( !textwise_check_dependencies() ) { return; }
 
@@ -158,21 +169,20 @@ function textwise_verify_token() {
 	if ($token == '') {
 		update_option('textwise_api_token_invalid', 'y');
 	} else {
-		//Make request to TextWise API for Signature
+		//Make request to TextWise API for Concept
 		$api = textwise_create_api();
 		$api_req['c'] = 'wp';
 		$api_req['content'] = '';
-		$result = $api->signature($api_req);
+		$result = $api->concept($api_req);
 
 		//Code 102: Invalid Token
-		if (is_array($result['message']) && $result['message']['code'] == '102') {
+		if (isset( $result['message']['code'] ) && $result['message']['code'] == '102') {
 			$invalid = 'y';
 		} else if ( is_array($result) && isset($result['error']) ) {
 			$invalid = 'c';
 		} else {
 			$invalid = 'n';
 		}
-
 
 		update_option('textwise_api_token_invalid', $invalid);
 	}
@@ -204,14 +214,9 @@ function textwise_check_detectconflict() {
 
 function textwise_check_versions() {
 	global $wp_version;
-//	In case we need to compare plugin version, too.
-//	$plugin = get_plugin_data(WP_PLUGIN_DIR . '/textwise/textwise.php');
-//	$plugin_version = $plugin['Version'];
 	$infoUrl = get_bloginfo('wpurl'). '/wp-admin/options-general.php?page=textwise/textwise-settings.php#versionwarning';
-	if ($wp_version < '2.8.6' && get_option('textwise_version_warning') != 1 ) {
+	if ($wp_version < '3.0' && get_option('textwise_version_warning') != 1 )
 		echo '<div class="updated"><p><b>Textwise:</b> This version of the Textwise Semantic Plugin has not been tested with your version of WordPress. If you experience any problems, please downgrade to plugin version 1.0.4. <em><a href="'.$infoUrl.'">Disable this warning</a></em></p></div>';
-
-	}
 }
 
 //Make sure PHP requirements available
@@ -281,7 +286,10 @@ function textwise_tinymce_plugins($plugins) {
 }
 
 function textwise_metabox_update() {
-	echo '';
+	$status = WP_PLUGIN_URL . '/textwise/img/updatestatus.gif';
+	$label = WP_PLUGIN_URL . '/textwise/img/updatebutton.png';
+	$html = '<a id="textwise_update_button"><span id="textwise_update_status"><img align="top" src="%s" alt="" /></span></a>';
+	echo sprintf( $html, $status, $label );
 }
 
 //Set metabox positions if unset.
@@ -292,9 +300,8 @@ function textwise_metabox_position($force = false) {
 	$mb_side = array('textwise_metabox_update');
 
 	//Metaboxes were partially implemented, and the tag and category interfaces were normally under the editor
-	if ($wp_version < '2.7') {
+	if ($wp_version < '2.7')
 		$mb_normal = array_merge(array('tagdiv', 'categorydiv'), $mb_normal);
-	}
 
 	if ($wp_version < '3.0') {
 		$metaboxorder = get_usermeta($current_user->ID, $table_prefix . 'metaboxorder_post');
@@ -432,16 +439,7 @@ function textwise_postboxes() {
 
 
 function textwise_admin_footer() {
-	echo '<div style="display:none;" id="textwisesignonce"></div>';
 	echo '<div id="textwise_bubble"></div>';
-}
-
-if ( !function_exists('wp_nonce_field') ) {
-	function textwise_nonce_field($action = -1) { return; }
-	$textwise_nonce = -1;
-} else {
-	function textwise_nonce_field($action = -1) { return wp_nonce_field($action); }
-	$textwise_nonce = 'textwise-update';
 }
 
 function textwise_ajax_nonce() {
@@ -464,47 +462,6 @@ function textwise_create_api() {
 	}
 }
 
-//Check Signature of current editor text against last signature.
-//Responses:
-//	"nochange" .. signature is the same
-//  "update" .. signature is different
-function textwise_ajax_chk_sig() {
-	//check_ajax_referer('textwisechksignonce');
-
-	//Extract current content to make API call
-	$id = $_POST['post_ID'];
-	$api_req['c'] = 'wp';
-	$api_req['content'] = stripslashes($_POST['content']);
-	$api_req['showLabels'] = 'true';
-	$api_req['extractor'] = 'html';
-	$api_req['filter'] = 'html';
-
-	//Make request to TextWise API for Signature
-	$api = textwise_create_api();
-	$result = $api->signature($api_req);
-
-	//Determine whether the signature has changed enough to merit updating the other content
-	$sig_new = textwise_create_sig_str($result['dimensions']);
-	$sig_old = get_post_meta($id, '_tw_signature', true);
-
-	//Only update if new signature is different and not empty (has significant words)
-	if ($sig_new == $sig_old || $sig_new == '') {
-		$data = 'nochange';
-	} else {
-		$data = 'update';
-		update_post_meta($id, '_tw_signature', $sig_new);
-	}
-
-	//Build AJAX response
-	$wpAjax = new WP_Ajax_Response( array(
-		'what' => 'textwise_chk_sig',
-		'id' => $id,
-		'data' => $id ? $data : '',
-		'supplemental' => array()
-	) );
-	$wpAjax->send();
-}
-
 //Respond to AJAX call with data from the API
 //Calls are only made to enabled sections (see get_option() calls)
 function textwise_ajax_content_update() {
@@ -512,13 +469,13 @@ function textwise_ajax_content_update() {
 
 	//$_POST has sent request info
 	//Extract current content to make API call
-	$id = $_POST['post_ID'];
+	$id = isset( $_POST['post_ID'] ) ? $_POST['post_ID'] : '';
 	$api_req['c'] = 'wp';
-	$api_req['content'] = stripslashes($_POST['content']);
+	$api_req['content'] = isset( $_POST['content'] ) ? stripslashes( $_POST['content'] ) : '';
 	$api_req['showLabels'] = 'true';
 	$api_req['filter'] = 'html';
 
-	//Make request to TextWise API for Signature
+	//Make request to TextWise API
 	$api = textwise_create_api();
 	$wpAjax = new WP_Ajax_Response();
 
@@ -778,18 +735,6 @@ function textwise_ajax_content_update() {
 	$wpAjax->send();
 }
 
-//Generate Signature string which will be compared in the textwise_ajax_chk_sig() callback
-//Currently just a comma-separated list of key:val pairs of dimension index & weights
-function textwise_create_sig_str($dimensions) {
-	$result = array();
-	$maxDimensions = 10;	//How many dimensions should use in the sig string?
-	for ($i=0; $i<count($dimensions) && $i<$maxDimensions; $i++) {
-		$d = $dimensions[$i];
-		$result[] = $d['index'].':'.$d['weight'];
-	}
-	return implode($result, ",");
-}
-
 //Escape text value for use in JSON string
 function textwise_esc_json($text) {
 	$trans['"'] = '\"';
@@ -954,34 +899,31 @@ _EOF_;
 
 //Capture selections from an article as it's being saved by the editor and store with article's metadata
 function textwise_savepost($post_ID) {
-	update_post_meta($post_ID, '_tw_tag_list',		$_POST['textwise_tag_input']);
-	update_post_meta($post_ID, '_tw_cat_list',		$_POST['textwise_cat_input']);
-	update_post_meta($post_ID, '_tw_video_list',	$_POST['textwise_video_input']);
-	update_post_meta($post_ID, '_tw_image_list',	$_POST['textwise_image_input']);
-	update_post_meta($post_ID, '_tw_rss_list',		$_POST['textwise_rss_input']);
-	update_post_meta($post_ID, '_tw_wiki_list',		$_POST['textwise_wiki_input']);
-	update_post_meta($post_ID, '_tw_product_list',	$_POST['textwise_product_input']);
+	update_post_meta($post_ID, '_tw_tag_list',		!empty( $_POST['textwise_tag_input'] )     ? $_POST['textwise_tag_input']     : '' );
+	update_post_meta($post_ID, '_tw_cat_list',		!empty( $_POST['textwise_cat_input'] )     ? $_POST['textwise_cat_input']     : '' );
+	update_post_meta($post_ID, '_tw_video_list',	!empty( $_POST['textwise_video_input'] )   ? $_POST['textwise_video_input']   : '' );
+	update_post_meta($post_ID, '_tw_image_list',	!empty( $_POST['textwise_image_input'] )   ? $_POST['textwise_image_input']   : '' );
+	update_post_meta($post_ID, '_tw_rss_list',		!empty( $_POST['textwise_rss_input'] )     ? $_POST['textwise_rss_input']     : '' );
+	update_post_meta($post_ID, '_tw_wiki_list',		!empty( $_POST['textwise_wiki_input'] )    ? $_POST['textwise_wiki_input']    : '' );
+	update_post_meta($post_ID, '_tw_product_list',	!empty( $_POST['textwise_product_input'] ) ? $_POST['textwise_product_input'] : '' );
 }
 
 //Create JS settings object with server-side data..
 function textwise_dataobject() {
 	global $post_ID, $wp_version;
-	$autoupdate = get_option('textwise_autoupdate') ? 0+get_option('textwise_autoupdate') : 0;
-	$tag_enable = (get_option('textwise_tag_enable') == 1) ? 1 : 0;
+	$autoupdate         = get_option('textwise_autoupdate') ? (int) get_option('textwise_autoupdate') : 0;
+	$tag_enable         = (get_option('textwise_tag_enable') == 1) ? 1 : 0;
 	$contentlink_enable = (get_option('textwise_contentlink_enable') == 1) ? 1 : 0;
-	$cat_enable = (get_option('textwise_category_enable') == 1) ? 1 : 0;
-	$video_enable = (get_option('textwise_video_enable') == 1) ? 1 : 0;
-	$image_enable = (get_option('textwise_image_enable') == 1) ? 1 : 0;
-	$rss_enable = (get_option('textwise_rss_enable') == 1) ? 1 : 0;
-	$wiki_enable = (get_option('textwise_wiki_enable') == 1) ? 1 : 0;
-	$product_enable = (get_option('textwise_product_enable') == 1) ? 1 : 0;
+	$cat_enable         = (get_option('textwise_category_enable') == 1) ? 1 : 0;
+	$video_enable       = (get_option('textwise_video_enable') == 1) ? 1 : 0;
+	$image_enable       = (get_option('textwise_image_enable') == 1) ? 1 : 0;
+	$rss_enable         = (get_option('textwise_rss_enable') == 1) ? 1 : 0;
+	$wiki_enable        = (get_option('textwise_wiki_enable') == 1) ? 1 : 0;
+	$product_enable     = (get_option('textwise_product_enable') == 1) ? 1 : 0;
 
 	$post_meta = get_post_custom($post_ID);
 	$tag_list = isset($post_meta['_tw_tag_list']) ? implode($post_meta['_tw_tag_list'], ',') : '';
 	$cat_list = isset($post_meta['_tw_cat_list']) ? implode($post_meta['_tw_cat_list'], ',') : '';
-//	$rss_list = isset($post_meta['_tw_rss_list']) ? implode(explode($post_meta['_tw_rss_list'], "\n"), ',') : '';
-//	$wiki_list = isset($post_meta['_tw_wiki_list']) ? implode(explode($post_meta['_tw_wiki_list'], "\n"), ',') : '';
-//	$product_list = isset($post_meta['_tw_product_list']) ? implode(explode($post_meta['_tw_product_list'], "\n"), ',') : '';
 	$output = <<<_EOF_
 <script>
 var textwise_dataobject = {
@@ -1027,8 +969,8 @@ function textwise_objDup($objArray, $matchTest, $arrFields) {
 }
 
 //Custom CSS used when viewing output
-function textwise_global_header() {
-	echo '<link rel="stylesheet" href="'.get_bloginfo('wpurl').'/wp-content/plugins/textwise/textwise_post.css" type="text/css" media="screen" />';
+function textwise_frontend_style() {
+	wp_enqueue_style('textwise_post', plugins_url( '/textwise/textwise.css', __FILE__ ) );
 }
 
 ?>
