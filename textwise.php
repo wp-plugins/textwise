@@ -50,8 +50,9 @@ if ( is_admin()
 		&& get_option('textwise_api_token')
 		&& get_option('textwise_api_token_invalid') == 'n'
 		&& textwise_services_enabled() ) {
-	add_action('load-post.php', 'textwise_init_editor');
-	add_action('load-post-new.php', 'textwise_init_editor');
+	add_action('add_meta_boxes_post', 'textwise_init_editor');
+	add_action('save_post', 'textwise_savepost');
+
 }
 
 //AJAX Callbacks
@@ -242,20 +243,9 @@ function textwise_admin_page() {
 function textwise_init_editor() {
 	global $wp_version;
 
-	if ( $post )
-		$post_type = $post->post_type;
-	elseif ( isset( $_POST['post_type'] ) && post_type_exists( $_POST['post_type'] ) )
-		$post_type = $_POST['post_type'];
-	else
-		$post_type = 'post';
-
-	if ( $post_type != 'post' )
-		return;
-
 	wp_enqueue_script('textwise', WP_PLUGIN_URL . '/textwise/textwise.js');
 	wp_enqueue_style('textwise', WP_PLUGIN_URL . '/textwise/textwise.css');
 	add_action('admin_print_scripts', 'textwise_dataobject');
-	add_action('save_post', 'textwise_savepost');
 	add_action('admin_footer', 'textwise_admin_footer');
 
 	//Re-enable relevant code for media plugin - affects YouTube video
@@ -892,6 +882,10 @@ _EOF_;
 
 //Capture selections from an article as it's being saved by the editor and store with article's metadata
 function textwise_savepost($post_ID) {
+	$post_type = $_REQUEST['post_type'];
+	if ( $post_type != 'post' )
+		return;
+
 	update_post_meta($post_ID, '_tw_tag_list',		!empty( $_POST['textwise_tag_input'] )     ? $_POST['textwise_tag_input']     : '' );
 	update_post_meta($post_ID, '_tw_cat_list',		!empty( $_POST['textwise_cat_input'] )     ? $_POST['textwise_cat_input']     : '' );
 	update_post_meta($post_ID, '_tw_video_list',	!empty( $_POST['textwise_video_input'] )   ? $_POST['textwise_video_input']   : '' );
