@@ -473,7 +473,7 @@ function textwise_ajax_content_update() {
 	} else {
 		$concept_results = array();
 	}
-	if ( is_array($result['message']) ) {
+	if ( isset( $result['message'] ) && is_array($result['message']) ) {
 		$sup = array('error' => $result['message']['string']);
 	}
 
@@ -553,7 +553,7 @@ function textwise_ajax_content_update() {
 		}
 		$arrVideos = array();
 		foreach ($vid_results as $m) {
-			if ($m['thumnailUrl'] != '') {
+			if ( isset( $m['thumnailUrl'] ) && $m['thumnailUrl'] != '') {
 				$vidThumb = $m['thumbnailUrl'];
 			} else {
 				$vidUrl = parse_url($m['landingPageUrl']);

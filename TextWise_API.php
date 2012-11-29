@@ -102,7 +102,8 @@ class TextWise_API
 			return $response;
 		}
 
-		switch ($parameters['format']) {
+		$parameters_format = !empty( $parameters['format'] ) ? $parameters['format'] : '';
+		switch ($parameters_format) {
 			case 'xml':
 			case '':
 				$badchars = array("\n", "\r");
@@ -232,7 +233,7 @@ class TextWise_API
 				$data[$key] = $val;
 			}
 		}
-		if ( trim($e['value']) != '' ) { $data['value'] = $e['value']; }
+		if ( isset( $e['value'] ) && trim($e['value']) != '' ) { $data['value'] = $e['value']; }
 		return $data;
 	}
 
@@ -269,7 +270,7 @@ class TextWise_API
 		$httpreq = parse_url($url);
 		$http_host = $httpreq['host'];
 		$http_path = $httpreq['path'];
-		$http_query = $httpreq['query'];
+		$http_query = !empty( $httpreq['query'] ) ? $httpreq['query'] : '';
 		$crlf = "\r\n";
 
 //		$ctx = stream_context_create($params);
