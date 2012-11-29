@@ -882,7 +882,7 @@ _EOF_;
 
 //Capture selections from an article as it's being saved by the editor and store with article's metadata
 function textwise_savepost($post_ID) {
-	$post_type = $_REQUEST['post_type'];
+	$post_type = !empty( $_REQUEST['post_type'] ) ? $_REQUEST['post_type'] : 'post';
 	if ( $post_type != 'post' )
 		return;
 
