@@ -241,6 +241,17 @@ function textwise_admin_page() {
 //Only runs on post.php & post-new.php (see load-* action)
 function textwise_init_editor() {
 	global $wp_version;
+
+	if ( $post )
+		$post_type = $post->post_type;
+	elseif ( isset( $_POST['post_type'] ) && post_type_exists( $_POST['post_type'] ) )
+		$post_type = $_POST['post_type'];
+	else
+		$post_type = 'post';
+
+	if ( $post_type != 'post' )
+		return;
+
 	wp_enqueue_script('textwise', WP_PLUGIN_URL . '/textwise/textwise.js');
 	wp_enqueue_style('textwise', WP_PLUGIN_URL . '/textwise/textwise.css');
 	add_action('admin_print_scripts', 'textwise_dataobject');
@@ -253,30 +264,24 @@ function textwise_init_editor() {
 		add_filter( 'mce_external_plugins', 'textwise_tinymce_plugins' );
 	}
 
-	//Necessary for 2.7+ but introduced somewhere between 2.6.1 - 2.6.4
-	if (function_exists('add_meta_box')) {
-		if ($wp_version < '2.7') {
-			$priority = 'low';
-		} else {
-			$priority = 'high';
-			//Add a special box for the update button in 2.7
-			add_meta_box('textwise_metabox_update', 'TextWise Similarity Search', 'textwise_metabox_update', 'post', 'side', 'high');
-		}
-		if (get_option('textwise_contentlink_enable') == '1') {
-			add_meta_box('textwise_metabox_contentlinks', 'Content Link Suggestions', 'textwise_metabox_contentlinks', 'post', 'normal', 'high');
-		}
-		if (get_option('textwise_image_enable') == '1') {
-			add_meta_box('textwise_metabox_images', 'Image Suggestions', 'textwise_metabox_images', 'post', 'normal', $priority);
-		}
-		if (get_option('textwise_video_enable') == '1') {
-			add_meta_box('textwise_metabox_videos', 'Video Suggestions', 'textwise_metabox_videos', 'post', 'normal', $priority);
-		}
-		if (get_option('textwise_rss_enable') == '1' || get_option('textwise_wiki_enable') == '1' || get_option('textwise_product_enable') == '1') {
-			add_meta_box('textwise_metabox_links', 'Relevant Content Suggestions', 'textwise_metabox_links', 'post', 'normal', $priority);
-		}
-	} else {
-		//For older versions, add postboxes manually
-		add_action('edit_form_advanced', 'textwise_postboxes');
+	$priority = 'high';
+
+	add_meta_box('textwise_metabox_update', 'TextWise Similarity Search', 'textwise_metabox_update', 'post', 'side', 'high');
+
+	if (get_option('textwise_contentlink_enable') == '1') {
+		add_meta_box('textwise_metabox_contentlinks', 'Content Link Suggestions', 'textwise_metabox_contentlinks', 'post', 'normal', 'high');
+	}
+
+	if (get_option('textwise_image_enable') == '1') {
+		add_meta_box('textwise_metabox_images', 'Image Suggestions', 'textwise_metabox_images', 'post', 'normal', $priority);
+	}
+
+	if (get_option('textwise_video_enable') == '1') {
+		add_meta_box('textwise_metabox_videos', 'Video Suggestions', 'textwise_metabox_videos', 'post', 'normal', $priority);
+	}
+
+	if (get_option('textwise_rss_enable') == '1' || get_option('textwise_wiki_enable') == '1' || get_option('textwise_product_enable') == '1') {
+		add_meta_box('textwise_metabox_links', 'Relevant Content Suggestions', 'textwise_metabox_links', 'post', 'normal', $priority);
 	}
 }
 
@@ -299,15 +304,7 @@ function textwise_metabox_position($force = false) {
 	$mb_normal = array('textwise_metabox_contentlinks', 'textwise_metabox_images', 'textwise_metabox_videos', 'textwise_metabox_links');
 	$mb_side = array('textwise_metabox_update');
 
-	//Metaboxes were partially implemented, and the tag and category interfaces were normally under the editor
-	if ($wp_version < '2.7')
-		$mb_normal = array_merge(array('tagdiv', 'categorydiv'), $mb_normal);
-
-	if ($wp_version < '3.0') {
-		$metaboxorder = get_usermeta($current_user->ID, $table_prefix . 'metaboxorder_post');
-	} else {
-		$metaboxorder = get_user_meta($current_user->ID, 'meta-box-order_post', true);
-	}
+	$metaboxorder = get_user_meta($current_user->ID, 'meta-box-order_post', true);
 
 	if ($metaboxorder) {
 		$usermeta_normal = explode(',', $metaboxorder['normal']);
@@ -336,11 +333,7 @@ function textwise_metabox_position($force = false) {
 			$metaboxorder['normal'] = implode(',', $usermeta_normal);
 			$metaboxorder['side'] = implode(',', $usermeta_side);
 
-			if ($wp_version < '3.0') {
-				update_user_option( $current_user->ID, "metaboxorder_post", $metaboxorder );
-			} else {
-				update_user_meta( $current_user->ID, 'meta-box-order_post', $metaboxorder );
-			}
+			update_user_meta( $current_user->ID, 'meta-box-order_post', $metaboxorder );
 			update_option('textwise_box_position', '0');
 		}
 
