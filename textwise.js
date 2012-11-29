@@ -109,18 +109,7 @@ function textwise_init() {
 	}
 
 	//Update button
-	//Conditional code to detect 2.7+ Dashboard layout
-/*
-	var twSidebar = jQuery('<div id="textwise_sidebar" class="side-info"></div>');
-	if (jQuery('#textwise_metabox_update').length) {	//2.7 postbox
-		jQuery('#textwise_metabox_update .inside').append(twSidebar);
-	} else if (jQuery('#submitpost div.side-info:first').length) {	//2.6 and earlier
-		jQuery('#submitpost div.side-info:first').before(twSidebar);
-	} else {
-		jQuery('#submitdiv').after(twSidebar);	//Backup 2.7 postbox
-	}
-	twSidebar.html('<a id="textwise_update_button"><span id="textwise_update_status"><img align="top" src="'+textwise_settings.pluginDir+'/img/updatestatus.gif" alt="" /></span></a>');
-*/
+
 	jQuery('#textwise_update_button').click(textwise_checkContent)
 		.mousedown(function(){jQuery('#textwise_update_label').attr('src', textwise_settings.pluginDir+'/img/updatebutton_down.png')})
 		.mouseup(function(){jQuery('#textwise_update_label').attr('src', textwise_settings.pluginDir+'/img/updatebutton.png')});
@@ -208,7 +197,7 @@ function textwise_getContent() {
 	//Strip default captions. Include user-defined captions in semantic search
 	post_content = post_content.replace(/<dd .*?wp-caption-dd.*?>.*?<\/dd>/gi, '');
 	var result = post_title+' '+post_content;
-	if (result == ' ' || result == ' <p><br mce_bogus="1"></p>') { result = ''; }
+	if (result == ' ' || result == ' <p><br data-mce-bogus="1"></p>') { result = ''; }
 	return result;
 }
 
