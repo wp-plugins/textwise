@@ -306,7 +306,7 @@ function textwise_contentUpdateCallback(response) {
 					var ulTag = jQuery('#textwise_tags');
 					textwise_sync_tag_list();
 					var tw_taglist = jQuery('#textwise_tag_input').val().split(',');
-					jQuery.each(results[i], function(i, tag){
+					jQuery.each(results[i], function(j, tag){
 						if (jQuery.inArray(tag.label, tw_taglist) == -1) {
 							ulTag.append('<li><a class="textwise_tag_link">'+textwise_html_esc(tag.label)+'</a></li>');
 						}
@@ -630,6 +630,7 @@ function textwise_tag_hover(e) {
 //Rebuild tag list and input
 function textwise_sync_tag_list() {
 	var wp_tags = jQuery(textwise_settings.taginput).val().split(',');
+	wp_tags = jQuery.map( wp_tags, jQuery.trim );
 	var tw_tags = jQuery('#textwise_tag_input').val().split(',');
 	var common_tags = [];
 	jQuery.each( tw_tags, function( key, val ) {
