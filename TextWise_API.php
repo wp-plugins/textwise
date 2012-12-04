@@ -14,6 +14,8 @@ class TextWise_API
     var $_baseUrl;
     var $_token;
 
+    var $connection_timeout = 10;
+
 	//Class Constructor, PHP4 compatible format
     function TextWise_API($parameters)
     {
@@ -275,11 +277,11 @@ class TextWise_API
 
 //		$ctx = stream_context_create($params);
 //		$fp = @fopen($url, 'rb', false, $ctx);
-		$fp = @fsockopen($http_host, 80, $ferrnum, $ferrstr, 30);
+		$fp = @fsockopen($http_host, 80, $ferrnum, $ferrstr, $this->connection_timeout);
 		if ($fp) {
 			//??
 		} else {
-			return array('error' => 'Your web server cannot connect to the TextWise API'.print_r($params, true));
+			return array('error' => 'Your web server cannot connect to the TextWise API (fopen)');
 		}
 
 		$request = "POST {$http_path}";
@@ -314,7 +316,7 @@ class TextWise_API
 		curl_setopt($curl, CURLOPT_POST, true);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($curl, CURLOPT_FAILONERROR, false);
-		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
+		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->connection_timeout);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
 
