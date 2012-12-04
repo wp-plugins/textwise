@@ -105,6 +105,13 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Changelog ==
 
+= 1.3.1 - December 2012 =
+* Remove use of API's Signature call
+* Fixed checking of empty/new posts based on TinyMCE changes
+* Only load UI for standard "post" post types.
+* Removal of some conditional code for WP 3.0 and earlier.
+* Better checking for unset variables for use in debug mode
+
 = 1.2.3 - July 2012 =
 * Update content link text selections
 
@@ -144,6 +151,9 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 * Support for WordPress 2.9.2 post edit interface
 
 == Upgrade Notice ==
+
+= 1.3.1 =
+* Remove the Signature API call and other improvements.
 
 = 1.2.3 =
 * Update content link text selections
