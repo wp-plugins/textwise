@@ -3,11 +3,11 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://textwise.com/tools/wordpress-plugin-0
 Description: SemanticHacker API integration for WordPress
-Version: 1.3.0
+Version: 1.3.1
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
-	Copyright 2008-2011  TextWise, LLC.  ( email : admin@semantichacker.com )
+	Copyright 2008-2012  TextWise, LLC.  ( email : admin@semantichacker.com )
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -445,6 +445,17 @@ function textwise_create_api() {
 	}
 }
 
+function textwise_ajax_connection_error( $wpAjax, $what, $id, $error ) {
+	$wpAjax->add( array(
+		'what'         => $what,
+		'id'           => $id,
+		'data'         => '',
+		'supplemental' => array( 'error' => $error )
+	) );
+	$wpAjax->send();
+	exit();
+}
+
 //Respond to AJAX call with data from the API
 //Calls are only made to enabled sections (see get_option() calls)
 function textwise_ajax_content_update() {
@@ -466,6 +477,10 @@ function textwise_ajax_content_update() {
 	if (get_option('textwise_tag_enable') == '1' || get_option('textwise_contentlink_enable')) {
 		$api_req['includePositions'] = 'true';
 		$result = $api->concept($api_req);
+
+		//Detect connection error ASAP.
+		if ( isset( $result['error'] ) )
+			textwise_ajax_connection_error( $wpAjax, 'tags', $id, $result['error'] );
 	}
 
 	if ( is_array($result['concepts']) ) {
@@ -520,6 +535,12 @@ function textwise_ajax_content_update() {
 	//Categories
 	if (get_option('textwise_category_enable') == '1') {
 		$result = $api->category($api_req);
+
+		//Detect connection error ASAP.
+		if ( isset( $result['error'] ) )
+			textwise_ajax_connection_error( $wpAjax, 'categories', $id, $result['error'] );
+
+
 		$cat_results = null;
 		if ( isset($result['categories']) )
 			$cat_results = $result['categories'];
@@ -545,6 +566,11 @@ function textwise_ajax_content_update() {
 		$api_req['indexId'] = 'youtube';
 		$api_req['fields'] = 'title,landingPageUrl,enclosureUrl,thumbnailUrl';
 		$result = $api->match($api_req);
+
+		//Detect connection error ASAP.
+		if ( isset( $result['error'] ) )
+			textwise_ajax_connection_error( $wpAjax, 'videos', $id, $result['error'] );
+
 		$vidString = "{title: '%s', thumbnailUrl: '%s', enclosureUrl: '%s', landingPageUrl: '%s', videoId: '%s'}";
 		if( isset($result['matches']) ) {
 			$vid_results = $result['matches'];
@@ -583,6 +609,12 @@ function textwise_ajax_content_update() {
 		$api_req['indexId'] = 'images';
 		$api_req['fields'] = 'title,thumbnailUrl,imageUrl,source,landingPageUrl';
 		$result = $api->match($api_req);
+
+		//Detect connection error ASAP.
+		if ( isset( $result['error'] ) )
+			textwise_ajax_connection_error( $wpAjax, 'images', $id, $result['error'] );
+
+
 		$imgString = "{title:'%s', thumbnailUrl:'%s', landingPageUrl:'%s', imageUrl:'%s', source:'%s'}";
 		$img_results = null;
 		if(isset($result['matches']))
@@ -615,6 +647,11 @@ function textwise_ajax_content_update() {
 		$api_req['indexId'] = 'rsscombined';
 		$api_req['fields'] = 'title,description,landingPageUrl,channelTitle,channelLink';
 		$result = $api->match($api_req);
+
+		//Detect connection error ASAP.
+		if ( isset( $result['error'] ) )
+			textwise_ajax_connection_error( $wpAjax, 'rss', $id, $result['error'] );
+
 		$rssString = "{title:'%s', description:'%s', landingPageUrl:'%s', channelTitle: '%s', channelLink: '%s'}";
 		$bnews_results = null;
 		if(isset($result['matches']))
@@ -646,6 +683,11 @@ function textwise_ajax_content_update() {
 		$api_req['indexId'] = 'wikipedia';
 		$api_req['fields'] = 'title,description,landingPageUrl,channelTitle,channelLink';
 		$result = $api->match($api_req);
+
+		//Detect connection error ASAP.
+		if ( isset( $result['error'] ) )
+			textwise_ajax_connection_error( $wpAjax, 'wiki', $id, $result['error'] );
+
 		$wikiString = "{title:'%s', description:'%s', landingPageUrl:'%s', channelTitle: '%s', channelLink: '%s'}";
 		$wiki_results = null;
 		if(isset($result['matches']))
@@ -678,6 +720,11 @@ function textwise_ajax_content_update() {
 		$api_req['indexId'] = 'amazon';
 		$api_req['fields'] = 'title,description,landingPageUrl,imageUrl';
 		$result = $api->match($api_req);
+
+		//Detect connection error ASAP.
+		if ( isset( $result['error'] ) )
+			textwise_ajax_connection_error( $wpAjax, 'products', $id, $result['error'] );
+
 		$prod_results = null;
 		if ( isset($result['matches']) ) {
 			$prod_results = $result['matches'];
@@ -956,8 +1003,11 @@ function textwise_objDup($objArray, $matchTest, $arrFields) {
 }
 
 //Custom CSS used when viewing output
+//Use the filter to provide an alternate stylesheet URL or return an empty string to disable it.
 function textwise_frontend_style() {
-	wp_enqueue_style('textwise_post', plugins_url( '/textwise/textwise.css', __FILE__ ) );
+	$style_path =  apply_filters( 'textwise_frontend_style_path', plugins_url( '/textwise_post.css', __FILE__ ) );
+	if ( !empty( $style_path ) )
+		wp_enqueue_style('textwise_post', $style_path );
 }
 
 ?>
