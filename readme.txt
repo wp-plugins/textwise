@@ -105,7 +105,7 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Changelog ==
 
-= 1.3.1 - December 2012 =
+= 1.3.2 - December 2012 =
 * Remove use of API's Signature call
 * Fixed checking of empty/new posts based on TinyMCE changes
 * Only load UI for standard "post" post types.
@@ -152,7 +152,7 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Upgrade Notice ==
 
-= 1.3.1 =
+= 1.3.2 =
 * Remove the Signature API call and other improvements.
 
 = 1.2.3 =

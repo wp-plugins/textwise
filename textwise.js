@@ -295,6 +295,7 @@ function textwise_contentUpdateCallback(response) {
 				alert('Response error: '+res.responses[i].supplemental.error);
 				textwise_settings.lastUpdateStatus = 'error';
 				textwise_updateStatus('off');
+				textwise_settings.ajaxComplete = true;
 				return;
 			}
 		}

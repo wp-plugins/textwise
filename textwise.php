@@ -3,7 +3,7 @@
 Plugin Name: TextWise Similarity Search
 Plugin URI: http://textwise.com/tools/wordpress-plugin-0
 Description: SemanticHacker API integration for WordPress
-Version: 1.3.1
+Version: 1.3.2
 Author: TextWise, LLC
 Author URI: http://www.textwise.com/
 
