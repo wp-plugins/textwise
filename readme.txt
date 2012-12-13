@@ -2,7 +2,7 @@
 Contributors: textwise
 Tags: semantic, admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, articles
 Requires at least: 3.1
-Tested up to: 3.4.1
+Tested up to: 3.4.2
 Stable tag: 1.2.3
 
 Use the power of TextWise Similarity Search technology to find related images, videos, and other content to your blog post as you edit.
@@ -59,7 +59,7 @@ Once the plugin is installed and activated, look for the TextWise section under 
 
 Similarity Search analyzes a body of text in order to find the concepts within it. The responses we provide from our database are the results that closely match those same concepts.
 
-At the core of this process are Semantic Signatures&reg;, a new way of representing and analyzing semantic information in text. Semantic Signatures provide a representation of the multiple concepts and topics contained in a body of text, whether a few words or an entire document.
+At the core of this process is Semantic Gist&reg;, a new way of representing and analyzing semantic information in text. Semantic Gist provides a representation of the multiple concepts and topics contained in a body of text, whether a few words or an entire document.
 
 Learn more about our Similarity Search technologies at [TextWise.com](http://www.textwise.com/)
 
