@@ -3,7 +3,7 @@ Contributors: textwise
 Tags: semantic, admin, Post, posts, tags, tagging, links, photo, photos, images, video, youtube, amazon, articles
 Requires at least: 3.1
 Tested up to: 3.4.2
-Stable tag: 1.2.3
+Stable tag: 1.3.3
 
 Use the power of TextWise Similarity Search technology to find related images, videos, and other content to your blog post as you edit.
 
@@ -79,7 +79,7 @@ Video settings can be changed through the Wordpress embedded media settings. Sel
 
 = How can I move an image or video once it is in my post? =
 
-To move the image and it's caption, be sure to highlight both the image and caption with your mouse. Then cut &amp; paste.
+To move the image and its caption, be sure to highlight both the image and caption with your mouse. Then cut &amp; paste.
 
 = How can I include Relevant Content Suggestions in my post? =
 
@@ -105,7 +105,7 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Changelog ==
 
-= 1.3.2 - December 2012 =
+= 1.3.3 - December 2012 =
 * Remove use of API's Signature call
 * Fixed checking of empty/new posts based on TinyMCE changes
 * Only load UI for standard "post" post types.
@@ -152,7 +152,7 @@ While the plugin has been tested with different themes and plugins, we cannot gu
 
 == Upgrade Notice ==
 
-= 1.3.2 =
+= 1.3.3 =
 * Remove the Signature API call and other improvements.
 
 = 1.2.3 =
